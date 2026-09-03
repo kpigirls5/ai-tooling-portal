@@ -1,0 +1,1751 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topicus AI Tooling Portal</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%230f766e'/%3E%3Ctext x='16' y='21' font-family='Arial' font-weight='700' font-size='14' fill='white' text-anchor='middle'%3EAI%3C/text%3E%3C/svg%3E">
+<style>
+/* FIRM shared design tokens and components (both apps) */
+:root {
+  --font: "Segoe UI", -apple-system, BlinkMacSystemFont, Inter, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --mono: "Cascadia Code", "SF Mono", Menlo, Consolas, monospace;
+
+  --bg: #f4f6f8;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --border: #e2e8f0;
+  --border-strong: #cbd5e1;
+  --text: #0f172a;
+  --text-2: #475569;
+  --text-3: #64748b;
+
+  --accent: #1f4e79;          /* overridden per app */
+  --accent-strong: #163a5c;
+  --accent-soft: #e6eef6;
+  --accent-text: #ffffff;
+
+  --green: #15803d; --green-soft: #dcfce7; --green-text: #14532d;
+  --amber: #b45309; --amber-soft: #fef3c7; --amber-text: #78350f;
+  --red: #b91c1c;   --red-soft: #fee2e2;   --red-text: #7f1d1d;
+  --blue: #1d4ed8;  --blue-soft: #dbeafe;  --blue-text: #1e3a8a;
+  --purple: #6d28d9; --purple-soft: #ede9fe; --purple-text: #4c1d95;
+  --grey-soft: #e2e8f0; --grey-text: #334155;
+
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 2px rgba(15, 23, 42, 0.06), 0 1px 3px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 10px 30px rgba(15, 23, 42, 0.14);
+  --maxw: 1180px;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+h1, h2, h3, h4 { margin: 0 0 8px; line-height: 1.25; font-weight: 600; }
+h1 { font-size: 24px; letter-spacing: -0.01em; }
+h2 { font-size: 18px; }
+h3 { font-size: 15px; }
+p { margin: 0 0 10px; }
+small, .muted { color: var(--text-3); }
+.muted { font-size: 13px; }
+code, .mono { font-family: var(--mono); font-size: 12.5px; }
+hr { border: 0; border-top: 1px solid var(--border); margin: 16px 0; }
+
+/* ---- Layout ---- */
+.topbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 20;
+}
+.topbar-inner {
+  max-width: var(--maxw); margin: 0 auto; padding: 0 24px;
+  display: flex; align-items: center; gap: 20px; height: 58px;
+}
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 15px; color: var(--text); white-space: nowrap; }
+.brand .mark {
+  width: 30px; height: 30px; border-radius: 8px; background: var(--accent); color: var(--accent-text);
+  display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; letter-spacing: 0.02em;
+}
+.brand .sub { display: block; font-size: 11px; font-weight: 500; color: var(--text-3); line-height: 1.1; }
+.nav { display: flex; gap: 4px; margin-left: 12px; flex: 1; }
+.nav button {
+  background: none; border: 0; padding: 8px 12px; border-radius: 8px; font: inherit; font-weight: 500; color: var(--text-2); cursor: pointer; white-space: nowrap;
+}
+.nav button:hover { background: var(--surface-2); color: var(--text); }
+.nav button.active { background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; }
+.user-chip { display: flex; align-items: center; gap: 10px; }
+.user-chip .avatar { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; }
+.user-chip .name { font-weight: 600; font-size: 13px; line-height: 1.2; }
+.user-chip .role { font-size: 11.5px; color: var(--text-3); line-height: 1.2; white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+.user-chip .name { white-space: nowrap; }
+.user-chip .signout { margin-left: 6px; }
+
+.page { max-width: var(--maxw); margin: 0 auto; padding: 24px; }
+.page-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
+.page-header p { color: var(--text-2); max-width: 720px; }
+.grid { display: grid; gap: 16px; }
+.grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.split { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 20px; align-items: start; }
+.split-wide { grid-template-columns: minmax(0, 1fr) 340px; }
+@media (max-width: 900px) { .grid-2, .grid-3, .grid-4, .split, .split-wide { grid-template-columns: 1fr; } }
+.row { display: flex; gap: 10px; align-items: center; }
+.row.wrap { flex-wrap: wrap; }
+.spread { justify-content: space-between; }
+.stack > * + * { margin-top: 12px; }
+.right { margin-left: auto; }
+
+/* ---- Cards ---- */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); }
+.card-body { padding: 18px 20px; }
+.card-head { padding: 14px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; }
+.card-head h2, .card-head h3 { margin: 0; }
+.card.clickable { cursor: pointer; transition: border-color 0.12s, box-shadow 0.12s, transform 0.12s; }
+.card.clickable:hover { border-color: var(--border-strong); box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+.card.selected { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
+.panel { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; }
+.callout { border-left: 3px solid var(--accent); background: var(--accent-soft); padding: 12px 14px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; color: var(--accent-strong); }
+.callout.warn { border-color: var(--amber); background: var(--amber-soft); color: var(--amber-text); }
+.callout.danger { border-color: var(--red); background: var(--red-soft); color: var(--red-text); }
+.callout.ok { border-color: var(--green); background: var(--green-soft); color: var(--green-text); }
+.callout.info { border-color: var(--blue); background: var(--blue-soft); color: var(--blue-text); }
+.callout.neutral { border-color: var(--border-strong); background: var(--surface-2); color: var(--text-2); }
+
+/* ---- Badges ---- */
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; line-height: 1.5; white-space: nowrap; background: var(--grey-soft); color: var(--grey-text); }
+.badge.green { background: var(--green-soft); color: var(--green-text); }
+.badge.amber { background: var(--amber-soft); color: var(--amber-text); }
+.badge.red { background: var(--red-soft); color: var(--red-text); }
+.badge.blue { background: var(--blue-soft); color: var(--blue-text); }
+.badge.purple { background: var(--purple-soft); color: var(--purple-text); }
+.badge.accent { background: var(--accent-soft); color: var(--accent-strong); }
+.badge.outline { background: transparent; border: 1px solid var(--border-strong); color: var(--text-2); font-weight: 500; }
+.badge .dot { width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.tag { display: inline-block; padding: 1px 8px; border-radius: 6px; background: var(--surface-2); border: 1px solid var(--border); font-size: 12px; color: var(--text-2); }
+
+/* ---- Buttons ---- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text); font: inherit; font-weight: 600; font-size: 13.5px; cursor: pointer; white-space: nowrap; transition: background 0.12s, border-color 0.12s; }
+.btn:hover { background: var(--surface-2); }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); }
+.btn.primary:hover { background: var(--accent-strong); }
+.btn.ghost { border-color: transparent; background: transparent; color: var(--accent); }
+.btn.ghost:hover { background: var(--accent-soft); }
+.btn.danger { color: var(--red); border-color: #fca5a5; }
+.btn.danger:hover { background: var(--red-soft); }
+.btn.sm { padding: 5px 10px; font-size: 12.5px; }
+.btn.lg { padding: 11px 20px; font-size: 15px; }
+.btn.block { width: 100%; }
+.link-btn { background: none; border: 0; padding: 0; color: var(--accent); font: inherit; cursor: pointer; font-weight: 600; }
+.link-btn:hover { text-decoration: underline; }
+
+/* ---- Forms ---- */
+label.field { display: block; margin-bottom: 14px; }
+label.field > span.lbl, .field > .lbl { display: block; font-weight: 600; margin-bottom: 5px; font-size: 13.5px; }
+.lbl .req { color: var(--red); margin-left: 3px; }
+.lbl .opt { color: var(--text-3); font-weight: 400; margin-left: 6px; font-size: 12px; }
+input[type=text], input[type=search], input[type=url], input[type=email], input[type=number], textarea, select {
+  width: 100%; padding: 9px 11px; border: 1px solid var(--border-strong); border-radius: 8px; background: var(--surface); font: inherit; font-size: 14px; color: var(--text);
+}
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+textarea { min-height: 84px; resize: vertical; }
+input[type=checkbox], input[type=radio] { width: 16px; height: 16px; accent-color: var(--accent); margin: 0; }
+.help { color: var(--text-3); font-size: 12.5px; margin-top: 4px; }
+.field.invalid input, .field.invalid textarea, .field.invalid select { border-color: var(--red); }
+.field .err { color: var(--red); font-size: 12.5px; margin-top: 4px; }
+.choice-list { display: grid; gap: 8px; }
+.choice { display: flex; gap: 10px; align-items: flex-start; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); cursor: pointer; }
+.choice:hover { border-color: var(--border-strong); background: var(--surface-2); }
+.choice.on { border-color: var(--accent); background: var(--accent-soft); }
+.choice input { margin-top: 3px; }
+.choice .t { font-weight: 600; }
+.choice .h { color: var(--text-3); font-size: 12.5px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { padding: 6px 12px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); cursor: pointer; font: inherit; font-size: 13px; color: var(--text-2); }
+.chip:hover { border-color: var(--accent); color: var(--accent); }
+.chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+/* "Why we ask" explanation */
+details.why { margin-top: 6px; }
+details.why summary { cursor: pointer; color: var(--accent); font-size: 12.5px; font-weight: 600; list-style: none; display: inline-flex; align-items: center; gap: 5px; }
+details.why summary::-webkit-details-marker { display: none; }
+details.why summary::before { content: "i"; display: inline-flex; width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid currentColor; align-items: center; justify-content: center; font-size: 10px; font-style: italic; font-family: Georgia, serif; }
+details.why .why-body { margin-top: 6px; padding: 10px 12px; background: var(--surface-2); border-left: 3px solid var(--accent); border-radius: 0 6px 6px 0; font-size: 13px; color: var(--text-2); }
+details.why .why-body b { color: var(--text); }
+
+/* ---- Tables ---- */
+table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: top; }
+th { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-3); font-weight: 600; background: var(--surface-2); }
+tr.clickable { cursor: pointer; }
+tr.clickable:hover td { background: var(--surface-2); }
+.table-wrap { overflow-x: auto; }
+
+/* ---- Steps ---- */
+.steps { display: flex; gap: 6px; margin-bottom: 20px; }
+.step { flex: 1; padding: 10px 12px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); font-size: 12.5px; color: var(--text-3); display: flex; gap: 8px; align-items: center; }
+.step .n { width: 22px; height: 22px; border-radius: 50%; background: var(--grey-soft); color: var(--text-2); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 12px; flex-shrink: 0; }
+.step.active { border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
+.step.active .n { background: var(--accent); color: #fff; }
+.step.done { color: var(--text-2); }
+.step.done .n { background: var(--green-soft); color: var(--green-text); }
+
+/* ---- Modal ---- */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 20px; }
+.modal { background: var(--surface); border-radius: 14px; box-shadow: var(--shadow-lg); width: 100%; max-width: 620px; max-height: 92vh; overflow: auto; }
+.modal.wide { max-width: 900px; }
+.modal-head { padding: 18px 22px 0; display: flex; align-items: center; justify-content: space-between; }
+.modal-body { padding: 16px 22px; }
+.modal-foot { padding: 14px 22px 18px; display: flex; gap: 10px; justify-content: flex-end; border-top: 1px solid var(--border); }
+.x { background: none; border: 0; font-size: 22px; line-height: 1; color: var(--text-3); cursor: pointer; padding: 4px 8px; border-radius: 6px; }
+.x:hover { background: var(--surface-2); color: var(--text); }
+
+/* ---- Toast ---- */
+.toast-host { position: fixed; bottom: 20px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 60; }
+.toast { background: #0f172a; color: #fff; padding: 10px 14px; border-radius: 8px; font-size: 13.5px; box-shadow: var(--shadow-lg); max-width: 380px; animation: toastin 0.18s ease-out; }
+.toast.err { background: var(--red); }
+.toast.ok { background: var(--green); }
+@keyframes toastin { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+/* ---- Timeline (change history) ---- */
+.timeline { position: relative; padding-left: 26px; }
+.timeline::before { content: ""; position: absolute; left: 9px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+.tl-item { position: relative; padding-bottom: 18px; }
+.tl-item::before { content: ""; position: absolute; left: -22px; top: 5px; width: 12px; height: 12px; border-radius: 50%; background: var(--surface); border: 3px solid var(--accent); }
+.tl-item .tl-meta { font-size: 12.5px; color: var(--text-3); }
+.tl-item .tl-rationale { margin: 6px 0; padding: 10px 12px; background: var(--surface-2); border-radius: 6px; border-left: 3px solid var(--border-strong); }
+.tl-item ul { margin: 6px 0 0; padding-left: 18px; color: var(--text-2); font-size: 13px; }
+
+/* ---- Misc ---- */
+.empty { text-align: center; padding: 40px 20px; color: var(--text-3); }
+.empty h3 { color: var(--text-2); }
+.kv { display: grid; grid-template-columns: 170px 1fr; gap: 6px 14px; font-size: 13.5px; }
+.kv dt { color: var(--text-3); }
+.kv dd { margin: 0; }
+.stat { padding: 14px 16px; }
+.stat .v { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; }
+.stat .l { color: var(--text-3); font-size: 12.5px; }
+.lock { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text-3); }
+.proto-note { font-size: 12px; color: var(--text-3); border: 1px dashed var(--border-strong); padding: 6px 10px; border-radius: 6px; background: var(--surface); }
+.footer { max-width: var(--maxw); margin: 30px auto 24px; padding: 0 24px; font-size: 12px; color: var(--text-3); display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.search-big { display: flex; gap: 10px; align-items: center; background: var(--surface); border: 1px solid var(--border-strong); border-radius: 14px; padding: 6px 8px 6px 16px; box-shadow: var(--shadow); }
+.search-big input { border: 0; padding: 10px 4px; font-size: 17px; background: transparent; }
+.search-big input:focus { outline: none; }
+.search-big .btn { border-radius: 10px; }
+mark { background: #fde68a; padding: 0 1px; border-radius: 2px; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ---- Mock Entra ID sign-in ---- */
+.signin-bg { min-height: 100vh; display: flex; align-items: center; justify-content: center; background: linear-gradient(160deg, #eef2f7 0%, #dfe7f1 100%); padding: 20px; }
+.signin { width: 100%; max-width: 440px; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.2); padding: 40px 44px 28px; }
+.signin .idp { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #605e5c; margin-bottom: 18px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+.signin h1 { font-size: 24px; font-weight: 600; margin: 0 0 2px; color: #1b1b1b; }
+.signin .to { font-size: 15px; color: #1b1b1b; margin-bottom: 22px; }
+.signin .pick { font-size: 15px; font-weight: 600; margin-bottom: 8px; }
+.acct { display: flex; gap: 12px; align-items: center; padding: 12px 8px; border: 0; background: none; width: 100%; text-align: left; font: inherit; cursor: pointer; border-top: 1px solid #e5e5e5; }
+.acct:last-of-type { border-bottom: 1px solid #e5e5e5; }
+.acct:hover { background: #f3f3f3; }
+.acct .avatar { width: 36px; height: 36px; border-radius: 50%; background: #5c6bc0; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
+.acct .n { font-size: 15px; color: #1b1b1b; }
+.acct .u { font-size: 13px; color: #605e5c; }
+.acct .s { font-size: 12px; color: #605e5c; margin-left: auto; text-align: right; white-space: nowrap; }
+.signin .other { display: flex; gap: 12px; align-items: center; padding: 12px 8px; color: #1b1b1b; font-size: 15px; opacity: 0.55; cursor: not-allowed; }
+.signin .other .plus { width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center; font-size: 22px; color: #605e5c; }
+.signin .fine { margin-top: 22px; font-size: 12px; color: #605e5c; line-height: 1.5; }
+.signin .fine b { color: #1b1b1b; }
+
+
+/* Portal accent: teal */
+:root {
+  --accent: #0f766e;
+  --accent-strong: #115e59;
+  --accent-soft: #d9f2ef;
+}
+
+.hero { padding: 28px 0 8px; text-align: center; }
+.hero h1 { font-size: 30px; margin-bottom: 6px; }
+.hero p { color: var(--text-2); font-size: 15px; max-width: 640px; margin: 0 auto 18px; }
+.hero .search-big { max-width: 720px; margin: 0 auto 14px; }
+.hero .chips { justify-content: center; }
+
+.how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin: 26px 0; }
+.how .card-body { display: flex; gap: 12px; align-items: flex-start; }
+.how .n { width: 28px; height: 28px; border-radius: 50%; background: var(--accent-soft); color: var(--accent-strong); font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+@media (max-width: 800px) { .how { grid-template-columns: 1fr; } }
+
+.uc-card .card-body { display: flex; flex-direction: column; gap: 8px; min-height: 100%; }
+.uc-card h3 { font-size: 15px; margin: 0; }
+.uc-card .desc { color: var(--text-2); font-size: 13px; flex: 1; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.uc-card .tools { display: flex; flex-wrap: wrap; gap: 6px; }
+.uc-card .foot { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-3); margin-top: 4px; }
+.uc-card .foot span:first-child { white-space: nowrap; }
+.uc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 1000px) { .uc-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 680px) { .uc-grid { grid-template-columns: 1fr; } }
+
+.status-strip { height: 4px; border-radius: 10px 10px 0 0; }
+.status-strip.permitted { background: var(--green); }
+.status-strip.conditional { background: var(--amber); }
+.status-strip.pilot { background: var(--blue); }
+.status-strip.under-review { background: var(--purple); }
+.status-strip.not-permitted { background: var(--red); }
+
+.match { font-size: 12px; color: var(--text-3); }
+.match mark { background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; }
+
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12.5px; color: var(--text-2); align-items: center; }
+
+/* Tool cards in intake */
+.tool-pick { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 800px) { .tool-pick { grid-template-columns: 1fr; } }
+.tool-card { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; cursor: pointer; background: var(--surface); display: flex; gap: 10px; align-items: flex-start; }
+.tool-card:hover { border-color: var(--border-strong); }
+.tool-card.on { border-color: var(--accent); background: var(--accent-soft); }
+.tool-card input { margin-top: 3px; }
+.tool-card .t { font-weight: 600; }
+.tool-card .m { font-size: 12.5px; color: var(--text-3); }
+.tool-card.new { border-style: dashed; }
+
+/* Intake layout */
+.intake { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; align-items: start; }
+@media (max-width: 960px) { .intake { grid-template-columns: 1fr; } }
+.rail { position: sticky; top: 76px; }
+.rail .card + .card { margin-top: 12px; }
+.rail-pol { display: flex; gap: 8px; align-items: center; padding: 6px 0; border-top: 1px solid var(--border); font-size: 13px; }
+.rail-pol:first-child { border-top: 0; }
+.rail-pol .v { font-family: var(--mono); font-size: 11.5px; color: var(--text-3); }
+.risk-meter { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; }
+.risk-meter.standard { background: var(--green-soft); color: var(--green-text); }
+.risk-meter.elevated { background: var(--amber-soft); color: var(--amber-text); }
+.risk-meter.high { background: var(--red-soft); color: var(--red-text); }
+.risk-meter b { font-size: 14px; }
+
+.policy-group { border: 1px solid var(--border); border-radius: 10px; margin-bottom: 14px; overflow: hidden; }
+.policy-group .pg-head { padding: 10px 16px; background: var(--surface-2); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+.policy-group .pg-head details.why { margin: 0; }
+.policy-group .pg-head details.why .why-body { position: absolute; z-index: 5; max-width: 420px; box-shadow: var(--shadow-lg); background: var(--surface); border: 1px solid var(--border); }
+.policy-group .pg-head { position: relative; }
+.policy-group .pg-body { padding: 14px 16px 6px; }
+.policy-group .pg-body .field { margin-bottom: 18px; }
+.covered { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 13px; color: var(--text-2); }
+.covered .ok { color: var(--green); font-weight: 700; }
+
+.class-pick { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 800px) { .class-pick { grid-template-columns: repeat(2, 1fr); } }
+.class-pick .choice { flex-direction: column; gap: 4px; }
+.class-pick .sugg { font-size: 11px; font-weight: 700; color: var(--accent-strong); background: var(--accent-soft); padding: 1px 7px; border-radius: 999px; }
+
+.nav-btns { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--border); }
+
+.success { text-align: center; padding: 30px 20px; }
+.success .big { width: 60px; height: 60px; border-radius: 50%; background: var(--green-soft); color: var(--green); display: inline-flex; align-items: center; justify-content: center; font-size: 30px; margin-bottom: 12px; }
+.flow { text-align: left; margin: 20px auto 0; max-width: 620px; }
+.flow-step { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); align-items: flex-start; }
+.flow-step:first-child { border-top: 0; }
+.flow-step .ic { width: 26px; height: 26px; border-radius: 50%; background: var(--surface-2); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+.flow-step .ic.done { background: var(--green-soft); border-color: #86efac; color: var(--green); font-weight: 700; }
+.flow-step .ic.wait { background: var(--blue-soft); border-color: #93c5fd; color: var(--blue); }
+
+.assist { border: 1px dashed var(--accent); border-radius: 10px; padding: 12px 14px; background: var(--accent-soft); }
+.assist h4 { margin: 0 0 4px; font-size: 13.5px; color: var(--accent-strong); }
+.assist .muted { color: var(--accent-strong); opacity: 0.85; }
+
+.sys-status-approved { color: var(--green); }
+.sys-status-not-permitted { color: var(--red); }
+
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/*
+ * FIRM policy & guidelines engine (shared between browser and Node).
+ *
+ * Given a use-case "profile" (classification, data types, affected persons, ...)
+ * it works out which policies/guidelines apply, which requirements fire, which
+ * intake questions must therefore be asked, and which high-risk rules trigger.
+ *
+ * The same code runs in the portal (live form adaptation), in the registry
+ * (simulator) and on the server (stamping governing versions on submission),
+ * so the three can never disagree.
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.FirmEngine = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
+  'use strict';
+
+  // ---- Profile fields the engine understands -------------------------------
+  // `kind` is "one" (single value) or "many" (array of values).
+  const FIELDS = {
+    division: {
+      label: 'Division',
+      kind: 'one',
+      options: [
+        { value: 'Healthcare', label: 'Topicus Healthcare', short: 'Healthcare' },
+        { value: 'Finance', label: 'Topicus Finance', short: 'Finance' },
+        { value: 'Education', label: 'Topicus Education', short: 'Education' },
+        { value: 'Government', label: 'Topicus Government', short: 'Government' },
+        { value: 'Corporate', label: 'Corporate / shared services', short: 'Corporate' }
+      ]
+    },
+    category: {
+      label: 'Type of use',
+      kind: 'one',
+      options: [
+        { value: 'content', label: 'Writing, summarising, drafting', short: 'Writing' },
+        { value: 'code', label: 'Software development', short: 'Code' },
+        { value: 'meetings', label: 'Meeting transcription and notes', short: 'Meetings' },
+        { value: 'translation', label: 'Translation', short: 'Translation' },
+        { value: 'analysis', label: 'Analysis, search and Q&A', short: 'Analysis' },
+        { value: 'images', label: 'Image or media generation', short: 'Images' },
+        { value: 'automation', label: 'Process automation (classification, extraction)', short: 'Automation' },
+        { value: 'decision-support', label: 'Decision support about people', short: 'Decision support' },
+        { value: 'customer-facing', label: 'Customer-facing assistant or content', short: 'Customer-facing' },
+        { value: 'other', label: 'Other', short: 'Other' }
+      ]
+    },
+    classification: {
+      label: 'Information classification',
+      kind: 'one',
+      options: [
+        { value: 'Public', label: 'Public', hint: 'May be shared with anyone.' },
+        { value: 'Internal', label: 'Internal', hint: 'For Topicus employees; limited harm if leaked.' },
+        { value: 'Confidential', label: 'Confidential', hint: 'Personal data, customer data, source code, contracts.' },
+        { value: 'Secret', label: 'Secret', hint: 'Severe damage if disclosed: patient records, security keys, M&A.' }
+      ]
+    },
+    dataTypes: {
+      label: 'Data involved',
+      kind: 'many',
+      options: [
+        { value: 'none', label: 'No real data (synthetic or public only)', short: 'No real data' },
+        { value: 'business', label: 'Business information (documents, code, plans)', short: 'Business information' },
+        { value: 'personal', label: 'Personal data (names, contact details, IDs)', short: 'Personal data' },
+        { value: 'financial', label: 'Financial data of customers', short: 'Financial data' },
+        { value: 'special', label: 'Special-category data (health, biometrics, religion, etc.)', short: 'Special-category data' },
+        { value: 'minors', label: 'Data about children or students', short: 'Data about minors' }
+      ]
+    },
+    affected: {
+      label: 'Who is affected by the output',
+      kind: 'many',
+      options: [
+        { value: 'none', label: 'Nobody in particular (internal productivity)', short: 'Nobody in particular' },
+        { value: 'employees', label: 'Topicus employees or applicants', short: 'Employees' },
+        { value: 'customers', label: 'Customers or their end users', short: 'Customers' },
+        { value: 'patients', label: 'Patients or clients in care', short: 'Patients' },
+        { value: 'citizens', label: 'Citizens', short: 'Citizens' },
+        { value: 'students', label: 'Pupils or students', short: 'Students' }
+      ]
+    },
+    decisionImpact: {
+      label: 'Role in decisions about people',
+      kind: 'one',
+      options: [
+        { value: 'none', label: 'None: output does not influence decisions about people', short: 'None' },
+        { value: 'informs', label: 'Informs a decision that a person makes', short: 'Informs a decision' },
+        { value: 'automated', label: 'Makes or triggers the decision automatically', short: 'Automated decision' }
+      ]
+    },
+    externalOutput: {
+      label: 'Output shared outside Topicus',
+      kind: 'one',
+      options: [
+        { value: 'no', label: 'No, internal use only', short: 'No' },
+        { value: 'yes', label: 'Yes, customers, patients, citizens or the public receive it', short: 'Yes' }
+      ]
+    },
+    toolStatus: {
+      label: 'Tool',
+      kind: 'one',
+      options: [
+        { value: 'approved', label: 'An already approved tool', short: 'Approved tool' },
+        { value: 'new', label: 'A new tool that is not yet approved', short: 'New tool' }
+      ]
+    },
+    hosting: {
+      label: 'Tool hosting location',
+      kind: 'one',
+      options: [
+        { value: 'eu', label: 'EU / EEA' },
+        { value: 'non-eu', label: 'Outside the EU' },
+        { value: 'unknown', label: 'Unknown' }
+      ]
+    },
+    trainsOnData: {
+      label: 'Vendor trains on customer data',
+      kind: 'one',
+      options: [
+        { value: 'no', label: 'No' },
+        { value: 'yes', label: 'Yes' },
+        { value: 'unknown', label: 'Unknown' }
+      ]
+    }
+  };
+
+  const CLASSIFICATION_ORDER = ['Public', 'Internal', 'Confidential', 'Secret'];
+
+  function optionLabel(field, value, short) {
+    const f = FIELDS[field];
+    if (!f) return String(value);
+    const o = f.options.find((x) => x.value === value);
+    if (!o) return String(value);
+    return short && o.short ? o.short : o.label;
+  }
+
+  // ---- Condition evaluation --------------------------------------------------
+  // Condition grammar:
+  //   { always: true }
+  //   { all: [cond, ...] }   every child must hold
+  //   { any: [cond, ...] }   at least one child must hold
+  //   { field, in: [...] }         scalar field value is one of
+  //   { field, includesAny: [...] } array field shares a value with
+  //   { field, eq: value }
+  function evaluateCondition(cond, profile) {
+    if (!cond) return true; // null/undefined = inherits from parent
+    if (cond.always) return true;
+    if (Array.isArray(cond.all)) return cond.all.every((c) => evaluateCondition(c, profile));
+    if (Array.isArray(cond.any)) return cond.any.some((c) => evaluateCondition(c, profile));
+    if (cond.field) {
+      const v = profile ? profile[cond.field] : undefined;
+      if (cond.in) return v !== undefined && v !== null && cond.in.indexOf(v) !== -1;
+      if (cond.includesAny) {
+        const arr = Array.isArray(v) ? v : v ? [v] : [];
+        return cond.includesAny.some((x) => arr.indexOf(x) !== -1);
+      }
+      if (Object.prototype.hasOwnProperty.call(cond, 'eq')) return v === cond.eq;
+    }
+    return false;
+  }
+
+  function describeLeaf(cond) {
+    const f = FIELDS[cond.field];
+    const name = f ? f.label : cond.field;
+    const vals = (cond.in || cond.includesAny || [cond.eq]).map((v) => optionLabel(cond.field, v, true));
+    const joined = vals.length > 1 ? vals.slice(0, -1).join(', ') + ' or ' + vals[vals.length - 1] : vals[0];
+    if (cond.includesAny) return name + ' includes ' + joined;
+    return name + ' is ' + joined;
+  }
+
+  function describeCondition(cond) {
+    if (!cond || cond.always) return 'Always applies';
+    if (Array.isArray(cond.all)) return cond.all.map((c) => wrap(c)).join(' AND ');
+    if (Array.isArray(cond.any)) return cond.any.map((c) => wrap(c)).join(' OR ');
+    if (cond.field) return describeLeaf(cond);
+    return 'Never';
+    function wrap(c) {
+      const s = describeCondition(c);
+      return c.all || c.any ? '(' + s + ')' : s;
+    }
+  }
+
+  // ---- Base fields (registry minimum, always collected) -----------------------
+  const BASE_FIELDS = {
+    'base:owner': { label: 'Accountable owner', step: 'Use case details' },
+    'base:purpose': { label: 'Purpose and scope', step: 'Use case details' },
+    'base:classification': { label: 'Information classification', step: 'Data and classification' },
+    'base:tool': { label: 'Tool details (vendor, hosting, training)', step: 'Tool' },
+    'base:justification': { label: 'Why existing approved tools are insufficient', step: 'Tool' }
+  };
+
+  // ---- Main evaluation ---------------------------------------------------------
+  // profile: { division, category, classification, dataTypes[], affected[], decisionImpact, externalOutput, toolStatus, hosting, trainsOnData }
+  // policiesDoc: { policies: [...], riskRules: { version, rules: [...] } }
+  function evaluate(profile, policiesDoc) {
+    const applicable = [];
+    const intakeFields = [];
+    const governedBy = [];
+    const seenKeys = new Set();
+
+    (policiesDoc.policies || []).forEach((p) => {
+      if (p.status && p.status !== 'active') return;
+      if (!evaluateCondition(p.appliesWhen, profile)) return;
+      const fired = [];
+      (p.requirements || []).forEach((r) => {
+        if (!evaluateCondition(r.when, profile)) return;
+        fired.push(r);
+        if (r.intake && !seenKeys.has(r.intake.key)) {
+          seenKeys.add(r.intake.key);
+          intakeFields.push({
+            key: r.intake.key,
+            label: r.intake.label,
+            type: r.intake.type,
+            required: !!r.intake.required,
+            options: r.intake.options || null,
+            placeholder: r.intake.placeholder || '',
+            why: r.why,
+            requirementId: r.id,
+            requirementText: r.text,
+            policyId: p.id,
+            policyTitle: p.shortTitle || p.title,
+            policyType: p.type
+          });
+        }
+      });
+      applicable.push({
+        id: p.id,
+        title: p.title,
+        shortTitle: p.shortTitle || p.title,
+        type: p.type,
+        source: p.source,
+        version: p.version,
+        reason: describeCondition(p.appliesWhen),
+        requirements: fired.map((r) => ({
+          id: r.id,
+          text: r.text,
+          why: r.why,
+          coveredBy: r.coveredBy || null,
+          coveredLabel: r.coveredBy ? (BASE_FIELDS[r.coveredBy] || { label: r.coveredBy }).label : null,
+          intakeKey: r.intake ? r.intake.key : null,
+          reason: r.when ? describeCondition(r.when) : null
+        }))
+      });
+      governedBy.push({ policyId: p.id, version: p.version });
+    });
+
+    const riskRules = policiesDoc.riskRules || { rules: [], version: 0 };
+    const flags = (riskRules.rules || []).filter((r) => evaluateCondition(r.when, profile));
+    let riskLevel = 'standard';
+    if (flags.some((f) => f.severity === 'high')) riskLevel = 'high';
+    else if (flags.some((f) => f.severity === 'elevated')) riskLevel = 'elevated';
+    governedBy.push({ riskRulesVersion: riskRules.version });
+
+    return {
+      applicable,
+      intakeFields,
+      risk: {
+        level: riskLevel,
+        flags: flags.map((f) => ({ id: f.id, label: f.label, severity: f.severity, reference: f.reference, guidance: f.guidance }))
+      },
+      governedBy
+    };
+  }
+
+  // ---- Routing (mock of the existing Power Automate flow) -----------------------
+  function route(profile, riskLevel, routingDoc) {
+    const primary = (routingDoc.divisionCoordinators || {})[profile.division] || routingDoc.divisionCoordinators.Corporate;
+    const escalations = (routingDoc.escalations || []).filter((e) => {
+      if (e.when && e.when.riskLevel) return e.when.riskLevel.indexOf(riskLevel) !== -1;
+      return evaluateCondition(e.when, profile);
+    });
+    return {
+      primary,
+      escalations: escalations.map((e) => ({ id: e.id, label: e.label, to: e.to, reason: e.reason }))
+    };
+  }
+
+  // ---- Small helpers used by both UIs -------------------------------------------
+  function classificationAtLeast(a, b) {
+    return CLASSIFICATION_ORDER.indexOf(a) >= CLASSIFICATION_ORDER.indexOf(b);
+  }
+
+  // Suggest a classification from the declared data types (the requester confirms it).
+  function suggestClassification(dataTypes) {
+    const d = dataTypes || [];
+    if (d.indexOf('special') !== -1) return 'Secret';
+    if (d.indexOf('minors') !== -1 || d.indexOf('financial') !== -1 || d.indexOf('personal') !== -1) return 'Confidential';
+    if (d.indexOf('business') !== -1) return 'Internal';
+    return 'Public';
+  }
+
+  const RISK_LABELS = {
+    high: { title: 'Potentially high-risk', text: 'Full assessment by AI Governance is required before a decision. This flag is rule-based; the final decision stays with the decision maker.' },
+    elevated: { title: 'Elevated attention', text: 'Additional checks apply. The decision maker may ask for extra information.' },
+    standard: { title: 'Standard review', text: 'No high-risk rules triggered. Standard review by the division AI coordinator.' }
+  };
+
+  return {
+    FIELDS,
+    BASE_FIELDS,
+    CLASSIFICATION_ORDER,
+    RISK_LABELS,
+    optionLabel,
+    evaluateCondition,
+    describeCondition,
+    evaluate,
+    route,
+    classificationAtLeast,
+    suggestClassification
+  };
+});
+
+
+/*
+ * FIRM domain service (shared between the Node server and the hosted, browser-only build).
+ *
+ * All business rules live here: policy versioning with mandatory rationale, request
+ * intake with data minimisation and governing-version stamping, exports, tool lookup.
+ * Storage is injected as an adapter: { read(name), write(name, obj), reset() }.
+ *   - server.js uses a JSON-file adapter
+ *   - shared/localapi.js (hosted build) uses a localStorage adapter seeded from FIRM_SEED
+ */
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory(require('./engine.js'));
+  else root.FirmService = factory(root.FirmEngine);
+})(typeof self !== 'undefined' ? self : this, function (engine) {
+  'use strict';
+
+  function ServiceError(status, message) { this.status = status; this.message = message; }
+  ServiceError.prototype = Object.create(Error.prototype);
+
+  const EDITABLE = ['title', 'shortTitle', 'type', 'source', 'issuer', 'reference', 'status', 'owner', 'summary', 'appliesWhen', 'requirements'];
+
+  function clone(o) { return JSON.parse(JSON.stringify(o === undefined ? null : o)); }
+  function snapshotOf(p) { const s = {}; EDITABLE.forEach((k) => { s[k] = clone(p[k]); }); return s; }
+  function hasRole(user, role) { return !!(user && user.roles && user.roles.indexOf(role) !== -1); }
+
+  function diffPolicy(oldP, newP) {
+    const changes = [];
+    ['title', 'shortTitle', 'type', 'source', 'issuer', 'reference', 'status', 'owner', 'summary'].forEach((k) => {
+      if ((oldP[k] || '') !== (newP[k] || '')) changes.push('Changed ' + k + (k === 'status' ? ' to "' + newP[k] + '"' : ''));
+    });
+    if (JSON.stringify(oldP.appliesWhen || null) !== JSON.stringify(newP.appliesWhen || null)) changes.push('Changed applicability to: ' + engine.describeCondition(newP.appliesWhen));
+    const oldReq = new Map((oldP.requirements || []).map((r) => [r.id, r]));
+    const newReq = new Map((newP.requirements || []).map((r) => [r.id, r]));
+    newReq.forEach((r, id) => {
+      if (!oldReq.has(id)) changes.push('Added ' + id + ': ' + r.text);
+      else if (JSON.stringify(oldReq.get(id)) !== JSON.stringify(r)) changes.push('Modified ' + id);
+    });
+    oldReq.forEach((r, id) => { if (!newReq.has(id)) changes.push('Removed ' + id + ': ' + r.text); });
+    return changes;
+  }
+
+  function validatePolicyInput(p) {
+    if (!p || typeof p !== 'object') return 'Missing policy';
+    if (!p.title || !String(p.title).trim()) return 'Title is required';
+    if (['policy', 'guideline', 'regulation', 'standard'].indexOf(p.type) === -1) return 'Type must be policy, guideline, regulation or standard';
+    if (['active', 'draft', 'retired'].indexOf(p.status) === -1) return 'Status must be active, draft or retired';
+    if (!Array.isArray(p.requirements)) return 'Requirements must be a list';
+    const ids = new Set();
+    for (const r of p.requirements) {
+      if (!r.id || !r.text) return 'Every requirement needs an id and text';
+      if (ids.has(r.id)) return 'Duplicate requirement id ' + r.id;
+      ids.add(r.id);
+      if (r.intake && (!r.intake.key || !r.intake.label || !r.intake.type)) return 'Requirement ' + r.id + ': intake needs key, label and type';
+    }
+    return null;
+  }
+
+  function csvEscape(v) {
+    if (v === null || v === undefined) return '';
+    const s = Array.isArray(v) ? v.join('; ') : String(v);
+    return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  }
+  function toCsv(rows, columns) {
+    return [columns.join(',')].concat(rows.map((r) => columns.map((c) => csvEscape(r[c])).join(','))).join('\n');
+  }
+  function requireRationale(rationale, what) {
+    if (!rationale || String(rationale).trim().length < 10) throw new ServiceError(400, 'A rationale of at least 10 characters is required ' + what);
+  }
+
+  function create(store) {
+    const S = {};
+
+    // ---- read models -------------------------------------------------------
+    S.accounts = function () {
+      const users = store.read('users');
+      return { tenant: users.tenant, accounts: users.accounts.map((a) => ({ oid: a.oid, name: a.name, upn: a.upn, jobTitle: a.jobTitle, department: a.department, division: a.division, roles: a.roles, lastSignIn: a.lastSignIn })) };
+    };
+    S.userByOid = function (oid) { return store.read('users').accounts.find((a) => a.oid === oid) || null; };
+    S.policies = function () { return store.read('policies'); };
+    S.catalog = function () { return store.read('catalog'); };
+    S.routing = function () { return store.read('routing'); };
+
+    S.evaluate = function (profile) {
+      const result = engine.evaluate(profile || {}, store.read('policies'));
+      result.routing = engine.route(profile || {}, result.risk.level, store.read('routing'));
+      return result;
+    };
+
+    S.toolLookup = function (name) {
+      const q = (name || '').trim().toLowerCase();
+      if (!q) return { found: false };
+      const kb = store.read('tool-knowledge');
+      const hit = kb.tools.find((t) => t.name.toLowerCase() === q || (t.aliases || []).some((a) => a.toLowerCase() === q))
+        || kb.tools.find((t) => t.name.toLowerCase().indexOf(q) !== -1 || q.indexOf(t.name.toLowerCase()) !== -1);
+      if (!hit) return { found: false, suggestions: kb.tools.slice(0, 6).map((t) => t.name) };
+      return { found: true, tool: hit, disclaimer: kb.disclaimer };
+    };
+
+    // ---- policies: append-only versioning ----------------------------------
+    S.createPolicy = function (user, input, rationale) {
+      if (!hasRole(user, 'Policy.Owner')) throw new ServiceError(403, 'Only policy owners can create policies');
+      const err = validatePolicyInput(input); if (err) throw new ServiceError(400, err);
+      requireRationale(rationale, 'when creating a policy');
+      const doc = store.read('policies');
+      let id = (input.id || '').trim().toUpperCase().replace(/[^A-Z0-9-]/g, '');
+      if (!id) id = (input.type === 'guideline' ? 'GL-' : input.type === 'regulation' ? 'REG-' : input.type === 'standard' ? 'STD-' : 'POL-') + input.title.toUpperCase().replace(/[^A-Z0-9]+/g, '').slice(0, 8);
+      if (doc.policies.some((x) => x.id === id)) throw new ServiceError(409, 'A policy with id ' + id + ' already exists');
+      const now = new Date().toISOString();
+      const policy = Object.assign({ id: id }, snapshotOf(input), {
+        version: 1,
+        history: [{ version: 1, at: now, by: user.name, rationale: rationale.trim(), changes: ['Created'], snapshot: snapshotOf(input) }]
+      });
+      doc.policies.push(policy);
+      store.write('policies', doc);
+      return policy;
+    };
+
+    S.updatePolicy = function (user, id, input, rationale) {
+      if (!hasRole(user, 'Policy.Owner')) throw new ServiceError(403, 'Only policy owners can change policies');
+      const doc = store.read('policies');
+      const idx = doc.policies.findIndex((x) => x.id === id);
+      if (idx === -1) throw new ServiceError(404, 'Unknown policy');
+      const old = doc.policies[idx];
+      const merged = Object.assign({}, old, input || {});
+      const err = validatePolicyInput(merged); if (err) throw new ServiceError(400, err);
+      requireRationale(rationale, 'for every change');
+      const changes = diffPolicy(old, merged);
+      if (!changes.length) throw new ServiceError(400, 'No changes detected');
+      // Backfill the snapshot of the version being superseded so the state that governed earlier intakes stays reconstructible.
+      const cur = old.history.find((h) => h.version === old.version);
+      if (cur && !cur.snapshot) cur.snapshot = snapshotOf(old);
+      const updated = Object.assign({}, old, snapshotOf(merged), {
+        id: old.id,
+        version: old.version + 1,
+        history: old.history.concat([{ version: old.version + 1, at: new Date().toISOString(), by: user.name, rationale: rationale.trim(), changes: changes, snapshot: snapshotOf(merged) }])
+      });
+      doc.policies[idx] = updated;
+      store.write('policies', doc);
+      return updated;
+    };
+
+    S.updateRiskRules = function (user, rules, rationale) {
+      if (!hasRole(user, 'Policy.Owner')) throw new ServiceError(403, 'Only policy owners can change risk rules');
+      if (!Array.isArray(rules)) throw new ServiceError(400, 'rules must be a list');
+      requireRationale(rationale, 'for every change');
+      const doc = store.read('policies');
+      const rr = doc.riskRules;
+      const oldMap = new Map(rr.rules.map((r) => [r.id, r]));
+      const newMap = new Map(rules.map((r) => [r.id, r]));
+      const changes = [];
+      newMap.forEach((r, id) => {
+        if (!oldMap.has(id)) changes.push('Added ' + id + ': ' + r.label);
+        else if (JSON.stringify(oldMap.get(id)) !== JSON.stringify(r)) changes.push('Modified ' + id);
+      });
+      oldMap.forEach((r, id) => { if (!newMap.has(id)) changes.push('Removed ' + id + ': ' + r.label); });
+      if (!changes.length) throw new ServiceError(400, 'No changes detected');
+      const cur = rr.history.find((h) => h.version === rr.version);
+      if (cur && !cur.snapshot) cur.snapshot = { rules: clone(rr.rules) };
+      rr.version += 1;
+      rr.rules = rules;
+      rr.history.push({ version: rr.version, at: new Date().toISOString(), by: user.name, rationale: rationale.trim(), changes: changes, snapshot: { rules: clone(rules) } });
+      store.write('policies', doc);
+      return rr;
+    };
+
+    // ---- requests (intakes) ------------------------------------------------
+    S.listRequests = function (user) {
+      if (!user) throw new ServiceError(401, 'Not signed in');
+      const all = store.read('requests').requests;
+      const visible = hasRole(user, 'Policy.Owner') ? all : all.filter((r) => r.requester && r.requester.upn === user.upn);
+      return { requests: visible.slice().sort((a, b) => (a.submittedAt < b.submittedAt ? 1 : -1)) };
+    };
+
+    S.submitRequest = function (user, body) {
+      if (!user) throw new ServiceError(401, 'Sign in to submit a request');
+      body = body || {};
+      const doc = store.read('policies');
+      const profile = {};
+      Object.keys(engine.FIELDS).forEach((k) => { if (body.profile && body.profile[k] !== undefined) profile[k] = body.profile[k]; });
+      const result = engine.evaluate(profile, doc);
+      // Data minimisation: only store answers to questions the engine actually asked.
+      const allowed = new Set(result.intakeFields.map((f) => f.key));
+      const answers = {};
+      Object.keys(body.answers || {}).forEach((k) => { if (allowed.has(k)) answers[k] = body.answers[k]; });
+      const missing = result.intakeFields.filter((f) => f.required && (answers[f.key] === undefined || answers[f.key] === '' || answers[f.key] === false || (Array.isArray(answers[f.key]) && !answers[f.key].length)));
+      if (missing.length) throw new ServiceError(400, 'Missing required answers: ' + missing.map((f) => f.key).join(', '));
+      if (!body.base || !body.base.owner || !body.base.purpose || !body.base.scope) throw new ServiceError(400, 'Owner, purpose and scope are required');
+      if (body.tool && body.tool.mode === 'new' && body.useCaseHasApprovedTools && !(body.justification || '').trim()) throw new ServiceError(400, 'Explain why the existing approved tools are insufficient');
+      const routing = engine.route(profile, result.risk.level, store.read('routing'));
+      const reqStore = store.read('requests');
+      const year = new Date().getFullYear();
+      const seq = reqStore.requests.filter((r) => r.id.indexOf('REQ-' + year) === 0).length + 61;
+      const record = {
+        id: 'REQ-' + year + '-' + String(seq).padStart(4, '0'),
+        submittedAt: new Date().toISOString(),
+        requester: { name: user.name, upn: user.upn, department: user.department },
+        status: 'Submitted',
+        decision: null,
+        type: body.type || (body.tool && body.tool.mode === 'new' ? 'new-tool' : 'existing-use-case'),
+        useCaseId: body.useCaseId || null,
+        useCaseTitle: body.useCaseTitle || body.base.title || null,
+        tool: body.tool || null,
+        justification: (body.justification || '').trim() || null,
+        profile: profile,
+        base: { owner: body.base.owner, purpose: body.base.purpose, scope: body.base.scope, title: body.base.title || null },
+        answers: answers,
+        risk: { level: result.risk.level, flags: result.risk.flags.map((f) => f.id) },
+        governedBy: result.governedBy,
+        routing: { primary: routing.primary, escalations: routing.escalations.map((e) => e.id), listsItemId: 230 + reqStore.requests.length, flowRunId: '0858513' + String(Date.now()).slice(-13) }
+      };
+      reqStore.requests.push(record);
+      store.write('requests', reqStore);
+      return { request: record, evaluation: result, routing: routing };
+    };
+
+    // ---- exports -----------------------------------------------------------
+    S.exportPoliciesJson = function () { return JSON.stringify(store.read('policies'), null, 2); };
+    S.exportPoliciesCsv = function () {
+      const doc = store.read('policies'); const rows = [];
+      doc.policies.forEach((pol) => (pol.requirements || []).forEach((r) => rows.push({
+        policyId: pol.id, policyTitle: pol.title, type: pol.type, source: pol.source, status: pol.status, owner: pol.owner, version: pol.version,
+        appliesWhen: engine.describeCondition(pol.appliesWhen), requirementId: r.id, requirement: r.text, requirementWhen: r.when ? engine.describeCondition(r.when) : 'Inherits policy applicability',
+        intakeKey: r.intake ? r.intake.key : (r.coveredBy || ''), intakeQuestion: r.intake ? r.intake.label : '', why: r.why
+      })));
+      return toCsv(rows, ['policyId', 'policyTitle', 'type', 'source', 'status', 'owner', 'version', 'appliesWhen', 'requirementId', 'requirement', 'requirementWhen', 'intakeKey', 'intakeQuestion', 'why']);
+    };
+    S.exportHistoryCsv = function () {
+      const doc = store.read('policies'); const rows = [];
+      doc.policies.forEach((pol) => (pol.history || []).forEach((h) => rows.push({ entity: pol.id, title: pol.title, version: h.version, changedAt: h.at, changedBy: h.by, rationale: h.rationale, changes: h.changes })));
+      (doc.riskRules.history || []).forEach((h) => rows.push({ entity: 'RISK-RULES', title: 'High-risk screening rules', version: h.version, changedAt: h.at, changedBy: h.by, rationale: h.rationale, changes: h.changes }));
+      rows.sort((a, b) => (a.changedAt < b.changedAt ? 1 : -1));
+      return toCsv(rows, ['entity', 'title', 'version', 'changedAt', 'changedBy', 'rationale', 'changes']);
+    };
+    S.exportRequestsCsv = function (user) {
+      if (!hasRole(user, 'Policy.Owner')) throw new ServiceError(403, 'Only policy owners can export intakes');
+      const rows = store.read('requests').requests.map((r) => ({
+        id: r.id, submittedAt: r.submittedAt, requester: r.requester.name, department: r.requester.department, status: r.status, type: r.type, useCase: r.useCaseTitle,
+        tool: r.tool ? r.tool.name : '', classification: r.profile.classification, riskLevel: r.risk.level, riskFlags: r.risk.flags,
+        governedBy: r.governedBy.map((g) => (g.policyId ? g.policyId + '@v' + g.version : 'RISK-RULES@v' + g.riskRulesVersion)), routedTo: r.routing.primary.name
+      }));
+      return toCsv(rows, ['id', 'submittedAt', 'requester', 'department', 'status', 'type', 'useCase', 'tool', 'classification', 'riskLevel', 'riskFlags', 'governedBy', 'routedTo']);
+    };
+    S.EXPORTS = {
+      'policies.json': { filename: 'firm-policies-export.json', mime: 'application/json', fn: 'exportPoliciesJson' },
+      'policies.csv': { filename: 'firm-policies-requirements.csv', mime: 'text/csv; charset=utf-8', fn: 'exportPoliciesCsv' },
+      'history.csv': { filename: 'firm-policy-change-history.csv', mime: 'text/csv; charset=utf-8', fn: 'exportHistoryCsv' },
+      'requests.csv': { filename: 'firm-intakes.csv', mime: 'text/csv; charset=utf-8', fn: 'exportRequestsCsv' }
+    };
+
+    // ---- demo reset --------------------------------------------------------
+    S.reset = function (user) {
+      if (!hasRole(user, 'Policy.Owner')) throw new ServiceError(403, 'Only policy owners can reset demo data');
+      store.reset();
+      return { ok: true };
+    };
+
+    /**
+     * Route an API-shaped call (method + path + body) to the service. Used by the
+     * hosted build so the front-end code is identical in both environments.
+     * Returns { status, body } or throws ServiceError.
+     */
+    S.dispatch = function (method, path, body, user) {
+      const url = path.split('?'); const p = url[0]; const qs = {};
+      (url[1] || '').split('&').forEach((kv) => { if (kv) { const i = kv.indexOf('='); qs[decodeURIComponent(kv.slice(0, i))] = decodeURIComponent(kv.slice(i + 1)); } });
+      if (p === '/api/accounts' && method === 'GET') return S.accounts();
+      if (p === '/api/me' && method === 'GET') { if (!user) throw new ServiceError(401, 'Not signed in'); return user; }
+      if (p === '/api/policies' && method === 'GET') return S.policies();
+      if (p === '/api/catalog' && method === 'GET') return S.catalog();
+      if (p === '/api/routing' && method === 'GET') return S.routing();
+      if (p === '/api/evaluate' && method === 'POST') return S.evaluate(body && body.profile);
+      if (p === '/api/tool-lookup' && method === 'GET') return S.toolLookup(qs.name);
+      if (p === '/api/policies' && method === 'POST') return S.createPolicy(user, body.policy, body.rationale);
+      const m = /^\/api\/policies\/([A-Za-z0-9-]+)$/.exec(p);
+      if (m && method === 'PUT') return S.updatePolicy(user, m[1], body.policy, body.rationale);
+      if (p === '/api/risk-rules' && method === 'PUT') return S.updateRiskRules(user, body.rules, body.rationale);
+      if (p === '/api/requests' && method === 'GET') return S.listRequests(user);
+      if (p === '/api/requests' && method === 'POST') return S.submitRequest(user, body);
+      if (p === '/api/admin/reset' && method === 'POST') return S.reset(user);
+      const ex = /^\/api\/export\/([a-z.]+)$/.exec(p);
+      if (ex && method === 'GET' && S.EXPORTS[ex[1]]) return S[S.EXPORTS[ex[1]].fn](user);
+      throw new ServiceError(404, 'Unknown API route ' + p);
+    };
+
+    return S;
+  }
+
+  return { create: create, ServiceError: ServiceError, validatePolicyInput: validatePolicyInput, diffPolicy: diffPolicy, toCsv: toCsv };
+});
+
+
+window.FIRM_SEED = {"users":{"tenant":{"name":"Topicus","idp":"Microsoft Entra ID","domain":"topicus.nl"},"accounts":[{"oid":"a1f3c2d4-0001-4e5f-9a8b-000000000001","name":"Sanne de Vries","upn":"sanne.devries@topicus.nl","jobTitle":"Software Engineer","department":"Topicus Healthcare","division":"Healthcare","roles":["Employee"],"groups":["All Employees","Healthcare Engineering"],"lastSignIn":"2026-09-02T16:41:00Z"},{"oid":"a1f3c2d4-0002-4e5f-9a8b-000000000002","name":"Daan Bakker","upn":"daan.bakker@topicus.nl","jobTitle":"Product Owner","department":"Topicus Finance","division":"Finance","roles":["Employee"],"groups":["All Employees","Finance Product"],"lastSignIn":"2026-09-01T08:12:00Z"},{"oid":"a1f3c2d4-0003-4e5f-9a8b-000000000003","name":"Marieke Jansen","upn":"marieke.jansen@topicus.nl","jobTitle":"AI Governance Lead","department":"Corporate Compliance","division":"Corporate","roles":["Employee","Policy.Owner","AIRegister.Admin"],"groups":["All Employees","AI Governance Board"],"lastSignIn":"2026-09-03T07:05:00Z"},{"oid":"a1f3c2d4-0004-4e5f-9a8b-000000000004","name":"Tom Visser","upn":"tom.visser@topicus.nl","jobTitle":"Information Security Officer","department":"CISO Office","division":"Corporate","roles":["Employee","Policy.Owner","Security.Officer"],"groups":["All Employees","Security Office"],"lastSignIn":"2026-09-02T14:30:00Z"}]},"policies":{"policies":[{"id":"POL-AI","type":"policy","title":"Topicus AI Policy","shortTitle":"AI Policy","source":"Internal","issuer":"Topicus AI Governance Board","reference":"intranet://governance/ai-policy","status":"active","owner":"Marieke Jansen","summary":"Sets the ground rules for any use of AI at Topicus: every AI use case has an accountable owner, a defined purpose and scope, a confirmed information classification, and a human who remains responsible for the outcome. Only approved tools may be used with Confidential or Secret information.","appliesWhen":{"always":true},"requirements":[{"id":"AI-01","text":"Every AI use case has a named, accountable owner.","why":"Someone must be able to answer for how the use case is run, who uses it and when it should be reviewed or stopped.","when":null,"coveredBy":"base:owner","intake":null},{"id":"AI-02","text":"The purpose and scope of the use case are written down before it is used.","why":"A clear purpose is what the classification, the risk assessment and later reviews are measured against. Scope creep is the most common way an approved use case becomes a non-compliant one.","when":null,"coveredBy":"base:purpose","intake":null},{"id":"AI-03","text":"The information classification of the data involved is confirmed by the requester.","why":"The classification decides which tools are permitted and which security and privacy requirements apply.","when":null,"coveredBy":"base:classification","intake":null},{"id":"AI-04","text":"Where AI output informs or makes decisions about people, a person reviews the output before it takes effect.","why":"Topicus does not allow AI to decide about people without meaningful human review. We need to understand who reviews what, and when.","when":{"all":[{"field":"decisionImpact","in":["informs","automated"]}]},"coveredBy":null,"intake":{"key":"humanOversight","label":"How does a person review the AI output before it affects someone?","type":"textarea","required":true,"placeholder":"Who reviews, at which moment, and what can they overrule?"}},{"id":"AI-05","text":"Confidential or Secret information is only processed in approved tools.","why":"Until a new tool is approved we cannot vouch for where the data goes. Confirming this protects you and the organisation while the request is reviewed.","when":{"all":[{"field":"toolStatus","in":["new"]},{"field":"classification","in":["Confidential","Secret"]}]},"coveredBy":null,"intake":{"key":"noConfidentialBeforeApproval","label":"I confirm that no Confidential or Secret information will be entered into this tool until approval is granted.","type":"checkbox","required":true}},{"id":"AI-06","text":"People outside Topicus who receive AI-generated content are told that AI was used.","why":"Transparency towards customers, patients, citizens and students is both a Topicus value and a legal expectation under the EU AI Act.","when":{"all":[{"field":"externalOutput","in":["yes"]}]},"coveredBy":null,"intake":{"key":"externalTransparency","label":"How will recipients be told that the content is AI-generated or AI-assisted?","type":"textarea","required":true,"placeholder":"e.g. a footer in generated letters, a notice in the chat interface"}},{"id":"AI-07","text":"AI incidents (harmful output, data leakage, unexpected behaviour) are reported to the Security Desk within 24 hours.","why":"Fast reporting limits damage and is required for our incident register. This is an acknowledgement, not extra work now.","when":null,"coveredBy":null,"intake":{"key":"incidentAck","label":"I know how to report an AI incident via the Security Desk.","type":"checkbox","required":true}}],"version":3,"history":[{"version":1,"at":"2025-03-12T09:00:00Z","by":"Marieke Jansen","rationale":"Initial AI Policy approved by the Governance Board.","changes":["Created with requirements AI-01 to AI-04"],"snapshot":null},{"version":2,"at":"2025-11-04T14:20:00Z","by":"Tom Visser","rationale":"Several shadow-IT incidents with consumer chatbots. Added an explicit confirmation that Confidential/Secret data stays out of unapproved tools, and the 24-hour incident reporting rule.","changes":["Added AI-05 (approved tools only)","Added AI-07 (incident reporting)"],"snapshot":null},{"version":3,"at":"2026-06-18T10:45:00Z","by":"Marieke Jansen","rationale":"Alignment with EU AI Act transparency obligations (Art. 50) that apply from August 2026.","changes":["Added AI-06 (transparency towards external recipients)","Reworded AI-04 to cover output that informs decisions, not only automated ones"],"snapshot":null}]},{"id":"GL-GENAI","type":"guideline","title":"Generative AI Usage Guidelines","shortTitle":"GenAI Guidelines","source":"Internal","issuer":"Topicus AI Governance Board","reference":"intranet://governance/genai-guidelines","status":"active","owner":"Marieke Jansen","summary":"Practical rules for everyday use of generative AI (text, code, images, translation): check outputs before you use them, keep secrets and personal data out of prompts, label published AI content and keep AI-generated code inside the normal review pipeline.","appliesWhen":{"all":[{"field":"category","in":["content","code","translation","images","analysis","customer-facing","meetings"]}]},"requirements":[{"id":"GEN-01","text":"Outputs are checked for accuracy and appropriateness before they are used.","why":"Generative models produce confident mistakes. We need to know how errors are caught before they reach a colleague, a customer or a codebase.","when":null,"coveredBy":null,"intake":{"key":"outputReview","label":"How will outputs be checked before they are used?","type":"textarea","required":true,"placeholder":"e.g. author reviews every draft; second reviewer for external documents"}},{"id":"GEN-02","text":"No credentials, secrets or personal data are entered into prompts unless the tool is approved for that classification.","why":"Prompts are data transfers. This acknowledgement is the single most effective control against accidental leakage.","when":null,"coveredBy":null,"intake":{"key":"promptHygieneAck","label":"Users of this use case will keep credentials, secrets and unapproved personal data out of prompts.","type":"checkbox","required":true}},{"id":"GEN-03","text":"AI-generated content that is published or sent externally is labelled as such.","why":"Required for transparency and to protect the credibility of Topicus communication.","when":{"all":[{"field":"externalOutput","in":["yes"]}]},"coveredBy":null,"intake":{"key":"contentLabelling","label":"Will externally shared AI-generated content be labelled?","type":"select","required":true,"options":["Yes, always","Only when substantially AI-generated","No","Not applicable"]}},{"id":"GEN-04","text":"AI-generated code goes through the standard peer review and security scanning pipeline.","why":"AI-assisted code has the same defect and licence risks as any other code, and a few of its own (hallucinated packages, insecure defaults).","when":{"all":[{"field":"category","in":["code"]}]},"coveredBy":null,"intake":{"key":"codePipeline","label":"Is AI-generated code subject to peer review and the security scanning pipeline?","type":"select","required":true,"options":["Yes, same pipeline as all code","Partially, review only","No","Unsure"]}},{"id":"GEN-05","text":"Generated imagery is only used under a licence that permits commercial use and indemnifies Topicus.","why":"Image generators differ widely in training-data provenance and licence terms. Some expose Topicus to copyright claims.","when":{"all":[{"field":"category","in":["images"]}]},"coveredBy":null,"intake":{"key":"imageLicenceAck","label":"Generated images will only be used from tools whose licence permits commercial use.","type":"checkbox","required":true}}],"version":2,"history":[{"version":1,"at":"2025-05-20T11:00:00Z","by":"Marieke Jansen","rationale":"First practical guideline for employees after roll-out of Microsoft 365 Copilot.","changes":["Created with GEN-01 to GEN-03"],"snapshot":null},{"version":2,"at":"2026-02-10T09:30:00Z","by":"Marieke Jansen","rationale":"GitHub Copilot and image generation became common; added code pipeline and image licensing rules.","changes":["Added GEN-04 (code pipeline)","Added GEN-05 (image licensing)"],"snapshot":null}]},{"id":"POL-ISP","type":"policy","title":"Information Security Policy and Classification Standard","shortTitle":"Information Security Policy","source":"Internal","issuer":"CISO Office","reference":"intranet://security/isp","status":"active","owner":"Tom Visser","summary":"Defines the four Topicus information classes (Public, Internal, Confidential, Secret) and the controls each requires. For AI use cases with Confidential or Secret information we need to know where data flows, who has access, how it is protected and how long the tool keeps it.","appliesWhen":{"all":[{"field":"classification","in":["Confidential","Secret"]}]},"requirements":[{"id":"ISP-01","text":"The data flow is documented: where inputs and outputs are stored and processed.","why":"Confidential data may only be processed in approved locations. We need the systems and regions involved to verify this.","when":null,"coveredBy":null,"intake":{"key":"dataFlow","label":"Where is the data stored and processed?","type":"textarea","required":true,"placeholder":"Systems, vendor, cloud region(s). e.g. Azure OpenAI, West Europe; outputs saved in SharePoint"}},{"id":"ISP-02","text":"Access to inputs and outputs is limited to roles that need it.","why":"Least privilege is the core control of the classification standard.","when":null,"coveredBy":null,"intake":{"key":"accessControl","label":"Who will have access to the inputs and outputs?","type":"text","required":true,"placeholder":"Roles or Entra ID groups"}},{"id":"ISP-03","text":"Data is encrypted in transit and at rest.","why":"Baseline control for any tool handling Confidential information. For new tools the vendor must confirm this.","when":{"all":[{"field":"toolStatus","in":["new"]}]},"coveredBy":null,"intake":{"key":"encryption","label":"Does the vendor confirm encryption in transit and at rest?","type":"select","required":true,"options":["Yes, documented","Claimed, not documented","No","Unknown"]}},{"id":"ISP-04","text":"Retention of prompts and outputs by the tool is known and acceptable.","why":"Long retention at a vendor increases exposure and complicates data subject requests.","when":null,"coveredBy":null,"intake":{"key":"retention","label":"How long does the tool retain prompts and outputs?","type":"select","required":true,"options":["Not retained","Up to 30 days","Up to 1 year","Indefinitely","Unknown"]}},{"id":"ISP-05","text":"Secret information is only processed on Topicus-controlled infrastructure and requires CISO approval.","why":"Secret is reserved for information whose disclosure would cause severe damage. No external vendor is approved for it.","when":{"all":[{"field":"classification","in":["Secret"]}]},"coveredBy":null,"intake":{"key":"secretAck","label":"I understand this request requires CISO approval and Topicus-controlled infrastructure.","type":"checkbox","required":true}}],"version":5,"history":[{"version":1,"at":"2023-01-15T09:00:00Z","by":"Tom Visser","rationale":"Migrated existing ISP into the register.","changes":["Created"],"snapshot":null},{"version":5,"at":"2026-04-02T13:10:00Z","by":"Tom Visser","rationale":"Added AI-specific retention question after a vendor was found to keep prompts indefinitely by default.","changes":["Added ISP-04 (retention)"],"snapshot":null}]},{"id":"REG-GDPR","type":"regulation","title":"General Data Protection Regulation (GDPR / AVG)","shortTitle":"GDPR","source":"External","issuer":"European Union","reference":"Regulation (EU) 2016/679","status":"active","owner":"Privacy Office","summary":"Applies whenever personal data is processed. For AI use cases this means a legal basis, data minimisation, an agreement with any processor, and a DPIA when the processing is likely to be high-risk (special-category data, children, automated decisions).","appliesWhen":{"all":[{"field":"dataTypes","includesAny":["personal","special","minors"]}]},"requirements":[{"id":"GDPR-01","text":"A legal basis for the processing is identified (Art. 6).","why":"Without a legal basis the processing is unlawful, regardless of how useful it is.","when":null,"coveredBy":null,"intake":{"key":"legalBasis","label":"What is the legal basis for processing personal data in this use case?","type":"select","required":true,"options":["Performance of a contract","Legitimate interest","Consent","Legal obligation","Public task","Not yet determined"]}},{"id":"GDPR-02","text":"Only personal data that is strictly necessary is processed (Art. 5(1)(c)).","why":"Data minimisation limits harm if something goes wrong and is often the easiest way to lower the risk level of a use case.","when":null,"coveredBy":null,"intake":{"key":"dataMinimisation","label":"Which personal data is strictly necessary, and what is deliberately excluded?","type":"textarea","required":true,"placeholder":"e.g. only the free-text complaint, no name, BSN or account number"}},{"id":"GDPR-03","text":"A data processing agreement is in place with any vendor that processes personal data (Art. 28).","why":"The vendor acts as a processor; without a DPA Topicus cannot lawfully hand over personal data.","when":{"all":[{"field":"toolStatus","in":["new"]}]},"coveredBy":null,"intake":{"key":"dpa","label":"Is a data processing agreement (DPA) in place with the vendor?","type":"select","required":true,"options":["Yes","In negotiation","No","Unknown"]}},{"id":"GDPR-04","text":"A Data Protection Impact Assessment is carried out for likely high-risk processing (Art. 35).","why":"Special-category data, data about children and automated decisions are on the mandatory DPIA list of the Dutch Data Protection Authority.","when":{"any":[{"field":"dataTypes","includesAny":["special","minors"]},{"field":"decisionImpact","in":["automated"]}]},"coveredBy":null,"intake":{"key":"dpiaStatus","label":"Has a DPIA been started with the Privacy Officer?","type":"select","required":true,"options":["Yes, completed","Yes, in progress","Not yet","Unsure whether one is needed"]}},{"id":"GDPR-05","text":"Processing of special-category data relies on an Art. 9 exception.","why":"Health, biometric and similar data is prohibited to process unless a specific exception applies. In healthcare this is usually Art. 9(2)(h).","when":{"all":[{"field":"dataTypes","includesAny":["special"]}]},"coveredBy":null,"intake":{"key":"art9Exception","label":"Which Art. 9 exception applies to the special-category data?","type":"select","required":true,"options":["Explicit consent (9(2)(a))","Provision of healthcare (9(2)(h))","Substantial public interest (9(2)(g))","Not yet determined"]}},{"id":"GDPR-06","text":"Data subjects are informed about the processing (Art. 13/14).","why":"People have a right to know their data is processed by an AI system, and to object or request access.","when":null,"coveredBy":null,"intake":{"key":"dataSubjectInfo","label":"How are the people whose data is used informed about this AI processing?","type":"textarea","required":false,"placeholder":"e.g. privacy statement update, notice in the customer portal"}}],"version":2,"history":[{"version":1,"at":"2025-03-12T09:05:00Z","by":"Privacy Office","rationale":"GDPR requirements mapped to AI intake questions.","changes":["Created with GDPR-01 to GDPR-04"],"snapshot":null},{"version":2,"at":"2026-01-22T15:00:00Z","by":"Privacy Office","rationale":"Healthcare pilots started processing health data; made the Art. 9 exception explicit and added data subject information.","changes":["Added GDPR-05 (Art. 9 exception)","Added GDPR-06 (informing data subjects)"],"snapshot":null}]},{"id":"REG-AIACT","type":"regulation","title":"EU Artificial Intelligence Act","shortTitle":"EU AI Act","source":"External","issuer":"European Union","reference":"Regulation (EU) 2024/1689","status":"active","owner":"Marieke Jansen","summary":"Risk-based regulation of AI systems. Use cases that inform or make decisions about people in Annex III areas (employment, essential services, education, public services) are high-risk and need human oversight, logging and documentation. Transparency obligations apply when people interact with AI or receive AI-generated content.","appliesWhen":{"any":[{"field":"decisionImpact","in":["informs","automated"]},{"field":"externalOutput","in":["yes"]},{"field":"category","in":["customer-facing","decision-support"]}]},"requirements":[{"id":"AIA-01","text":"The intended purpose of the AI system is documented (Art. 3(12)).","why":"The intended purpose determines the risk class. It is the same purpose statement collected for the registry.","when":null,"coveredBy":"base:purpose","intake":null},{"id":"AIA-02","text":"The use case is screened against the Annex III high-risk areas.","why":"Annex III lists the areas where AI that influences decisions about people is classified high-risk. Your answer drives the risk flag on this request.","when":{"all":[{"field":"decisionImpact","in":["informs","automated"]},{"field":"affected","includesAny":["employees","customers","patients","citizens","students"]}]},"coveredBy":null,"intake":{"key":"annexIII","label":"Does the use case fall into one of these Annex III areas?","type":"select","required":true,"options":["Employment, recruitment or worker management","Access to essential private or public services (credit, insurance, healthcare, benefits)","Education and vocational training","Public services, law enforcement or migration","None of these"]}},{"id":"AIA-03","text":"Effective human oversight measures are in place (Art. 14).","why":"For automated decisions the law requires that a competent person can understand, monitor and override the system.","when":{"all":[{"field":"decisionImpact","in":["automated"]}]},"coveredBy":null,"intake":{"key":"oversightMeasures","label":"Which oversight measures let a person monitor and override the system?","type":"textarea","required":true,"placeholder":"e.g. sampled review of 10% of decisions, stop button, appeal route"}},{"id":"AIA-04","text":"People are informed when they interact with an AI system or receive AI-generated content (Art. 50).","why":"Transparency obligations apply from August 2026 to chatbots and to synthetic text, image and audio shared with the public.","when":{"any":[{"field":"externalOutput","in":["yes"]},{"field":"category","in":["customer-facing"]}]},"coveredBy":null,"intake":{"key":"aiInteractionNotice","label":"Are people informed that they are interacting with, or receiving output from, an AI system?","type":"select","required":true,"options":["Yes, before the interaction","Yes, in the output","Not yet","Not applicable"]}},{"id":"AIA-05","text":"Inputs and outputs are logged so decisions can be traced (Art. 12).","why":"Logging is required for high-risk systems and is the only way to investigate a complaint afterwards.","when":{"all":[{"field":"decisionImpact","in":["informs","automated"]}]},"coveredBy":null,"intake":{"key":"logging","label":"Are inputs and outputs logged for traceability?","type":"select","required":true,"options":["Yes, with retention policy","Partially","No","Unknown"]}},{"id":"AIA-06","text":"Staff operating the AI system have a sufficient level of AI literacy (Art. 4).","why":"Since February 2025 organisations must ensure the people using AI systems understand their capabilities and limits.","when":null,"coveredBy":null,"intake":{"key":"aiLiteracyAck","label":"Users of this AI system have completed (or will complete) the Topicus AI literacy module.","type":"checkbox","required":true}}],"version":2,"history":[{"version":1,"at":"2025-08-01T08:00:00Z","by":"Marieke Jansen","rationale":"AI Act entered into force; prohibited practices and AI literacy obligations apply from Feb 2025.","changes":["Created with AIA-01, AIA-02, AIA-06"],"snapshot":null},{"version":2,"at":"2026-07-15T10:00:00Z","by":"Marieke Jansen","rationale":"Prepared for the 2 August 2026 application date of transparency (Art. 50) and high-risk obligations.","changes":["Added AIA-03 (human oversight)","Added AIA-04 (transparency)","Added AIA-05 (logging)"],"snapshot":null}]},{"id":"STD-NEN7510","type":"standard","title":"NEN 7510 Information security in healthcare","shortTitle":"NEN 7510","source":"External","issuer":"NEN (Royal Netherlands Standardization Institute)","reference":"NEN 7510-1/2:2017","status":"active","owner":"Tom Visser","summary":"Dutch healthcare information security standard. Applies to Topicus Healthcare use cases that touch patient data: the healthcare security officer assesses the processing, access to patient data is logged, and a care professional remains responsible for any decision informed by AI output.","appliesWhen":{"all":[{"field":"division","in":["Healthcare"]},{"field":"dataTypes","includesAny":["personal","special"]}]},"requirements":[{"id":"NEN-01","text":"The healthcare information security officer has assessed the processing of patient data.","why":"NEN 7510 requires a risk assessment before patient data is processed in a new way or by a new system.","when":null,"coveredBy":null,"intake":{"key":"nenAssessment","label":"Has the healthcare information security officer assessed this processing?","type":"select","required":true,"options":["Yes","Scheduled","Not yet","Unsure who to ask"]}},{"id":"NEN-02","text":"Access to patient data through the AI system is logged.","why":"Patients have a right to know who accessed their record; AI systems are no exception.","when":null,"coveredBy":null,"intake":{"key":"patientDataLogging","label":"Is access to patient data via this AI system logged per user?","type":"select","required":true,"options":["Yes","No","Unknown"]}},{"id":"NEN-03","text":"A care professional remains responsible for decisions informed by AI output.","why":"Professional responsibility under the Wet BIG cannot be delegated to a system.","when":{"all":[{"field":"decisionImpact","in":["informs","automated"]}]},"coveredBy":null,"intake":{"key":"responsibleProfessional","label":"Which care professional (role) remains responsible for decisions informed by the output?","type":"text","required":true,"placeholder":"e.g. treating physician, district nurse"}},{"id":"NEN-04","text":"Software whose output may influence diagnosis or treatment is checked against the Medical Device Regulation.","why":"If the output steers clinical decisions the software may qualify as a medical device, which changes the approval route entirely.","when":{"all":[{"field":"decisionImpact","in":["informs","automated"]},{"field":"affected","includesAny":["patients"]}]},"coveredBy":null,"intake":{"key":"mdrCheck","label":"Could the output influence a diagnosis or treatment decision?","type":"select","required":true,"options":["No, administrative only","Possibly","Yes","Unsure"]}}],"version":1,"history":[{"version":1,"at":"2026-01-22T15:20:00Z","by":"Tom Visser","rationale":"Healthcare division started its first AI pilots with patient letters.","changes":["Created with NEN-01 to NEN-04"],"snapshot":null}]},{"id":"REG-DORA","type":"regulation","title":"Digital Operational Resilience Act (DORA)","shortTitle":"DORA","source":"External","issuer":"European Union","reference":"Regulation (EU) 2022/2554","status":"active","owner":"Tom Visser","summary":"Applies to financial entities and their ICT service providers. Topicus Finance products fall under customers' DORA obligations, so any new AI vendor must be recorded in the ICT third-party register and assessed for criticality, exit strategy and concentration risk.","appliesWhen":{"all":[{"field":"division","in":["Finance"]},{"field":"toolStatus","in":["new"]}]},"requirements":[{"id":"DORA-01","text":"The vendor is recorded in the ICT third-party register.","why":"Our financial customers must be able to report their full ICT supply chain to the regulator, including our sub-processors.","when":null,"coveredBy":null,"intake":{"key":"thirdPartyRegisterAck","label":"I understand the vendor will be added to the ICT third-party register before use.","type":"checkbox","required":true}},{"id":"DORA-02","text":"It is assessed whether the use case supports a critical or important function.","why":"Critical functions trigger stricter contractual and exit requirements under DORA Art. 28-30.","when":null,"coveredBy":null,"intake":{"key":"criticalFunction","label":"Does the use case support a critical or important function for a financial customer?","type":"select","required":true,"options":["Yes","No","Unsure"]}},{"id":"DORA-03","text":"An exit strategy exists in case the vendor becomes unavailable.","why":"Resilience means the process must continue without the vendor.","when":null,"coveredBy":null,"intake":{"key":"exitStrategy","label":"How would the process continue if the vendor became unavailable?","type":"textarea","required":true,"placeholder":"e.g. manual fallback, switch to Azure OpenAI within two weeks"}}],"version":1,"history":[{"version":1,"at":"2025-01-17T09:00:00Z","by":"Tom Visser","rationale":"DORA applies from 17 January 2025.","changes":["Created with DORA-01 to DORA-03"],"snapshot":null}]},{"id":"GL-SUPPLIER","type":"guideline","title":"AI Tool and Supplier Assessment Guideline","shortTitle":"Supplier Assessment","source":"Internal","issuer":"CISO Office","reference":"intranet://security/supplier-assessment","status":"active","owner":"Tom Visser","summary":"What we need to know about a tool before it can be approved: who the vendor is, where data is hosted, whether it trains on our data, which certifications it holds, how it is licensed and who pays. Free and consumer plans almost never meet the bar for Confidential data.","appliesWhen":{"all":[{"field":"toolStatus","in":["new"]}]},"requirements":[{"id":"SUP-01","text":"Vendor, hosting location and training-on-data policy are known.","why":"These three facts decide most of the security and privacy assessment.","when":null,"coveredBy":"base:tool","intake":null},{"id":"SUP-02","text":"Existing approved tools for the use case have been considered and found insufficient.","why":"Every extra tool is extra attack surface and licence cost. A short justification saves everyone a review round.","when":null,"coveredBy":"base:justification","intake":null},{"id":"SUP-03","text":"The vendor's security certifications are known.","why":"Certifications let us reuse independent audit work instead of assessing the vendor from scratch.","when":null,"coveredBy":null,"intake":{"key":"certifications","label":"Which security certifications does the vendor hold?","type":"multiselect","required":true,"options":["ISO/IEC 27001","SOC 2 Type II","ISO/IEC 42001 (AI management)","NEN 7510","None known","Unknown"]}},{"id":"SUP-04","text":"The licence type is known.","why":"Consumer and free plans usually lack a DPA, admin controls and audit logs, and often train on your data.","when":null,"coveredBy":null,"intake":{"key":"licenceType","label":"How will the tool be licensed?","type":"select","required":true,"options":["Free or consumer plan","Individual paid licence","Team or Enterprise contract","Self-hosted / open source","Unknown"]}},{"id":"SUP-05","text":"A budget holder for the licence is identified.","why":"Tools without an owner for the cost tend to be abandoned without being decommissioned.","when":null,"coveredBy":null,"intake":{"key":"budgetHolder","label":"Who is the budget holder for the licences?","type":"text","required":false,"placeholder":"Name or team"}}],"version":3,"history":[{"version":1,"at":"2024-09-05T10:00:00Z","by":"Tom Visser","rationale":"Generic supplier assessment adapted for AI tooling.","changes":["Created"],"snapshot":null},{"version":3,"at":"2026-05-06T11:30:00Z","by":"Tom Visser","rationale":"Requests for new tools rarely explained why Copilot or Azure OpenAI did not suffice; made the justification an explicit requirement.","changes":["Added SUP-02 (existing tools considered)","Added ISO/IEC 42001 to certification options"],"snapshot":null}]},{"id":"GL-MINORS","type":"guideline","title":"Working with data about children and students","shortTitle":"Minors Guideline","source":"Internal","issuer":"Privacy Office","reference":"intranet://privacy/minors","status":"active","owner":"Privacy Office","summary":"Extra care for Topicus Education products and any use case involving data about people under 16: parents and schools are informed, and AI is never used to profile or score individual pupils for automated decisions.","appliesWhen":{"all":[{"field":"dataTypes","includesAny":["minors"]}]},"requirements":[{"id":"MIN-01","text":"Schools and parents are informed about AI processing of pupil data.","why":"Schools are the data controller and must be able to inform parents; they need to know before we switch anything on.","when":null,"coveredBy":null,"intake":{"key":"schoolParentInfo","label":"How will schools and parents be informed?","type":"textarea","required":true,"placeholder":"e.g. release notes to school administrators, updated processing register for schools"}},{"id":"MIN-02","text":"AI is not used to profile or score individual pupils for automated decisions.","why":"Profiling of children is on the mandatory DPIA list and is very hard to justify under GDPR.","when":null,"coveredBy":null,"intake":{"key":"noMinorProfilingAck","label":"The use case does not profile or score individual pupils or students for automated decisions.","type":"checkbox","required":true}}],"version":1,"history":[{"version":1,"at":"2026-03-03T09:00:00Z","by":"Privacy Office","rationale":"Education division requested guidance for learning analytics pilots.","changes":["Created with MIN-01 and MIN-02"],"snapshot":null}]}],"riskRules":{"version":2,"history":[{"version":1,"at":"2025-08-01T08:10:00Z","by":"Marieke Jansen","rationale":"Initial high-risk screening rules based on EU AI Act Annex III and the Dutch DPIA list.","changes":["Created HR-01 to HR-05"],"snapshot":null},{"version":2,"at":"2026-05-06T11:45:00Z","by":"Tom Visser","rationale":"Added elevated-attention rules for new tools hosted outside the EU and vendors that train on customer data.","changes":["Added HR-06, HR-07, HR-08"],"snapshot":null}],"rules":[{"id":"HR-01","label":"AI informs or makes decisions about people","severity":"high","reference":"EU AI Act Annex III","when":{"all":[{"field":"decisionImpact","in":["informs","automated"]},{"field":"affected","includesAny":["employees","customers","patients","citizens","students"]}]},"guidance":"Decisions about employment, access to services, education or public benefits are high-risk under the AI Act. Full assessment by AI Governance is required before approval."},{"id":"HR-02","label":"Special-category personal data (health, biometrics, etc.)","severity":"high","reference":"GDPR Art. 9; Dutch DPA DPIA list","when":{"all":[{"field":"dataTypes","includesAny":["special"]}]},"guidance":"Processing special-category data with AI is on the mandatory DPIA list. Privacy Office involvement is required."},{"id":"HR-03","label":"Data about children or students","severity":"high","reference":"GDPR Recital 38; Dutch DPA DPIA list","when":{"all":[{"field":"dataTypes","includesAny":["minors"]}]},"guidance":"Children merit specific protection. Any AI processing of pupil data needs a DPIA and school-level transparency."},{"id":"HR-04","label":"Fully automated decision without human review","severity":"high","reference":"GDPR Art. 22; EU AI Act Art. 14","when":{"all":[{"field":"decisionImpact","in":["automated"]}]},"guidance":"Solely automated decisions with legal or similarly significant effects are restricted under GDPR and require human oversight measures under the AI Act."},{"id":"HR-05","label":"Secret information involved","severity":"high","reference":"Topicus Information Security Policy","when":{"all":[{"field":"classification","in":["Secret"]}]},"guidance":"Secret information is never processed by external AI vendors. CISO approval required."},{"id":"HR-06","label":"New tool hosted outside the EU with personal data","severity":"elevated","reference":"GDPR Chapter V (international transfers)","when":{"all":[{"field":"toolStatus","in":["new"]},{"field":"hosting","in":["non-eu","unknown"]},{"field":"dataTypes","includesAny":["personal","special","minors"]}]},"guidance":"International transfers need a transfer mechanism (e.g. EU-US Data Privacy Framework or SCCs) and a transfer impact assessment."},{"id":"HR-07","label":"Vendor trains models on customer data","severity":"elevated","reference":"Topicus Supplier Assessment Guideline","when":{"all":[{"field":"trainsOnData","in":["yes","unknown"]},{"field":"classification","in":["Confidential","Secret"]}]},"guidance":"Confidential information must not become part of a vendor's training data. An enterprise contract with a training opt-out is usually required."},{"id":"HR-08","label":"AI output goes directly to people outside Topicus","severity":"elevated","reference":"EU AI Act Art. 50; Topicus AI Policy AI-06","when":{"all":[{"field":"externalOutput","in":["yes"]}]},"guidance":"Customer-facing output needs transparency notices and a stronger output review process."}]}},"catalog":{"meta":{"source":"Microsoft Lists: 'AI Tools Register' (synced copy)","lastSync":"2026-09-02T22:00:00Z","note":"Reviewed tools remain stored in Microsoft Lists as the internal data store. This registry is a read model over that list, extended with model and use-case levels."},"models":[{"id":"MDL-GPT4O","name":"GPT-4o","provider":"OpenAI (via Microsoft Azure)","modality":"Text, vision","hostedIn":"EU (Azure West Europe / Sweden Central)","trainingOnCustomerData":"No (contractual)","notes":"Used by Microsoft 365 Copilot and the Topicus Azure OpenAI tenant."},{"id":"MDL-GPT4OMINI","name":"GPT-4o mini","provider":"OpenAI (via Microsoft Azure)","modality":"Text","hostedIn":"EU (Azure West Europe)","trainingOnCustomerData":"No (contractual)","notes":"Cost-efficient model for classification and extraction tasks."},{"id":"MDL-EMB3","name":"text-embedding-3-large","provider":"OpenAI (via Microsoft Azure)","modality":"Embeddings","hostedIn":"EU (Azure West Europe)","trainingOnCustomerData":"No (contractual)","notes":"Retrieval for internal knowledge bases."},{"id":"MDL-CLAUDE","name":"Claude Sonnet 4","provider":"Anthropic","modality":"Text, vision","hostedIn":"EU (via Amazon Bedrock Frankfurt) / US","trainingOnCustomerData":"No (enterprise terms)","notes":"Available inside GitHub Copilot for code tasks."},{"id":"MDL-WHISPER","name":"Whisper large-v3","provider":"OpenAI (self-hosted by Techniek Beheerd)","modality":"Speech-to-text","hostedIn":"Topicus datacenter, Netherlands","trainingOnCustomerData":"No (self-hosted)","notes":"Runs on Topicus-controlled infrastructure."},{"id":"MDL-LLAMA","name":"Llama 3.1 70B","provider":"Meta (self-hosted by Techniek Beheerd)","modality":"Text","hostedIn":"Topicus datacenter, Netherlands","trainingOnCustomerData":"No (self-hosted)","notes":"Candidate for Secret-classified workloads; capacity limited."},{"id":"MDL-DEEPL","name":"DeepL translation model","provider":"DeepL SE","modality":"Translation","hostedIn":"EU (Germany)","trainingOnCustomerData":"No (Pro plan)","notes":""},{"id":"MDL-FIREFLY","name":"Firefly Image 3","provider":"Adobe","modality":"Image generation","hostedIn":"EU / US","trainingOnCustomerData":"No","notes":"Trained on licensed content; commercial indemnification."},{"id":"MDL-GPT-CONSUMER","name":"GPT-4o (consumer ChatGPT)","provider":"OpenAI","modality":"Text, vision","hostedIn":"US","trainingOnCustomerData":"Yes, unless opted out","notes":"Consumer plan; no DPA, no admin controls."}],"systems":[{"id":"SYS-M365COPILOT","name":"Microsoft 365 Copilot","vendor":"Microsoft","kind":"Assistant in Office apps","status":"approved","maxClassification":"Confidential","hostedIn":"EU Data Boundary","trainingOnCustomerData":"No","models":["MDL-GPT4O"],"approvedPurpose":"Drafting, summarising and searching across your own Microsoft 365 content (mail, Teams, SharePoint, Office documents).","conditions":["Respects existing SharePoint permissions; do not widen sharing to make content available to Copilot.","Not for Secret information."],"reviewedOn":"2025-05-02","reviewedBy":"CISO Office / AI Governance","listsItemId":12},{"id":"SYS-GHCOPILOT","name":"GitHub Copilot Business","vendor":"GitHub (Microsoft)","kind":"Coding assistant","status":"approved","maxClassification":"Confidential","hostedIn":"EU / US (no code retention)","trainingOnCustomerData":"No (Business plan)","models":["MDL-GPT4O","MDL-CLAUDE"],"approvedPurpose":"Code completion, code generation, test generation and code explanation inside the IDE for Topicus repositories.","conditions":["Public code filter must remain enabled.","Never paste credentials, keys or customer data into Copilot Chat.","Generated code follows the normal review pipeline."],"reviewedOn":"2025-09-14","reviewedBy":"CTO Office / CISO Office","listsItemId":18},{"id":"SYS-AOAI","name":"Azure OpenAI Service (Topicus tenant)","vendor":"Microsoft","kind":"AI platform / API","status":"approved","maxClassification":"Confidential","hostedIn":"EU (Azure West Europe, Sweden Central)","trainingOnCustomerData":"No (contractual)","models":["MDL-GPT4O","MDL-GPT4OMINI","MDL-EMB3"],"approvedPurpose":"Building AI features into Topicus products and internal tools, with content filtering and Topicus-controlled logging.","conditions":["Each product feature is registered as its own use case.","Personal data requires a per-use-case privacy assessment.","Use the shared landing zone; no personal subscriptions."],"reviewedOn":"2025-06-30","reviewedBy":"CISO Office / Privacy Office","listsItemId":15},{"id":"SYS-TEAMSRECAP","name":"Microsoft Teams Intelligent Recap","vendor":"Microsoft","kind":"Meeting transcription and summary","status":"approved","maxClassification":"Confidential","hostedIn":"EU Data Boundary","trainingOnCustomerData":"No","models":["MDL-GPT4O"],"approvedPurpose":"Transcribing and summarising internal Topicus meetings.","conditions":["Announce recording and transcription at the start of the meeting.","Not for meetings with patients, pupils or customers' end users."],"reviewedOn":"2025-08-20","reviewedBy":"Privacy Office","listsItemId":21},{"id":"SYS-WHISPER","name":"Topicus Transcribe (self-hosted Whisper)","vendor":"Topicus / Techniek Beheerd","kind":"Speech-to-text service","status":"approved","maxClassification":"Secret","hostedIn":"Topicus datacenter, Netherlands","trainingOnCustomerData":"No (self-hosted)","models":["MDL-WHISPER"],"approvedPurpose":"Transcription of audio that may not leave Topicus infrastructure, including care conversations with consent.","conditions":["Consent of all recorded persons is documented.","Audio deleted after transcription unless the use case states otherwise."],"reviewedOn":"2026-02-11","reviewedBy":"CISO Office","listsItemId":27},{"id":"SYS-DEEPL","name":"DeepL Pro","vendor":"DeepL SE","kind":"Translation","status":"approved","maxClassification":"Internal","hostedIn":"EU (Germany)","trainingOnCustomerData":"No (Pro plan)","models":["MDL-DEEPL"],"approvedPurpose":"Translating Public and Internal documents and messages.","conditions":["Not for Confidential documents; use Microsoft 365 Copilot instead."],"reviewedOn":"2025-04-08","reviewedBy":"CISO Office","listsItemId":9},{"id":"SYS-FIREFLY","name":"Adobe Firefly","vendor":"Adobe","kind":"Image generation","status":"approved","maxClassification":"Public","hostedIn":"EU / US","trainingOnCustomerData":"No","models":["MDL-FIREFLY"],"approvedPurpose":"Generating illustrations and marketing imagery for Topicus communication.","conditions":["Do not generate imagery of real people.","Label AI-generated imagery in external publications."],"reviewedOn":"2026-02-10","reviewedBy":"Marketing / Legal","listsItemId":25},{"id":"SYS-AIBUILDER","name":"Power Platform AI Builder","vendor":"Microsoft","kind":"Low-code AI (document processing, classification)","status":"approved","maxClassification":"Confidential","hostedIn":"EU (Power Platform Europe region)","trainingOnCustomerData":"No","models":["MDL-GPT4OMINI"],"approvedPurpose":"Internal process automation such as invoice extraction and mail classification.","conditions":["Flows that touch personal data are registered as separate use cases."],"reviewedOn":"2025-10-01","reviewedBy":"CISO Office","listsItemId":22},{"id":"SYS-CHATGPT-ENT","name":"ChatGPT Enterprise","vendor":"OpenAI","kind":"General assistant","status":"under-review","maxClassification":"Internal","hostedIn":"US (EU data residency available)","trainingOnCustomerData":"No (Enterprise)","models":["MDL-GPT4O"],"approvedPurpose":"Under review: evaluation for teams whose needs are not met by Microsoft 365 Copilot.","conditions":["Review started July 2026; DPA and data residency under negotiation."],"reviewedOn":null,"reviewedBy":null,"listsItemId":31},{"id":"SYS-CHATGPT-CONSUMER","name":"ChatGPT (Free / Plus)","vendor":"OpenAI","kind":"General assistant (consumer)","status":"not-permitted","maxClassification":"Public","hostedIn":"US","trainingOnCustomerData":"Yes, unless opted out","models":["MDL-GPT-CONSUMER"],"approvedPurpose":"Not permitted for any Topicus work data. Public information only, on a personal account.","conditions":["No DPA, no admin controls, prompts may be used for training."],"reviewedOn":"2025-11-04","reviewedBy":"CISO Office","listsItemId":4},{"id":"SYS-OTTER","name":"Otter.ai","vendor":"Otter.ai Inc.","kind":"Meeting transcription","status":"not-permitted","maxClassification":"Public","hostedIn":"US","trainingOnCustomerData":"Yes","models":[],"approvedPurpose":"Not permitted. Use Microsoft Teams Intelligent Recap or Topicus Transcribe.","conditions":["Joins meetings as a bot and retains recordings outside the EU."],"reviewedOn":"2025-08-20","reviewedBy":"Privacy Office","listsItemId":19},{"id":"SYS-GRAMMARLY","name":"Grammarly","vendor":"Grammarly Inc.","kind":"Writing assistant","status":"restricted","maxClassification":"Internal","hostedIn":"US","trainingOnCustomerData":"No (Business plan)","models":[],"approvedPurpose":"Grammar and style checking of Public and Internal texts on the Business plan.","conditions":["Browser extension must be disabled in Outlook and in product back-offices.","Not for Confidential text."],"reviewedOn":"2026-03-19","reviewedBy":"CISO Office","listsItemId":29},{"id":"SYS-MIDJOURNEY","name":"Midjourney","vendor":"Midjourney Inc.","kind":"Image generation","status":"not-permitted","maxClassification":"Public","hostedIn":"US","trainingOnCustomerData":"Yes","models":[],"approvedPurpose":"Not permitted for Topicus publications due to licence and provenance concerns. Use Adobe Firefly.","conditions":[],"reviewedOn":"2026-02-10","reviewedBy":"Legal","listsItemId":26}],"useCases":[{"id":"UC-001","title":"Drafting and summarising internal documents, mail and chats","category":"content","status":"permitted","division":"All","owner":"Head of Corporate Communications","purpose":"Save time on first drafts, summaries and rewrites of internal texts.","scope":"Internal Topicus documents, e-mails and Teams conversations up to Confidential. Excludes customer-facing publications (see UC-008).","systems":["SYS-M365COPILOT"],"classification":{"level":"Confidential","confirmedBy":"Marieke Jansen","confirmedOn":"2025-05-02"},"dataTypes":["business","personal"],"affected":["employees"],"decisionImpact":"none","conditions":["Author reviews every draft before sending.","Do not paste Secret information."],"keywords":["summarise","summary","draft","write","rewrite","email","mail","document","notes","report","teams","chat","text","proofread"],"lastReviewed":"2026-05-02"},{"id":"UC-002","title":"Code generation, completion and review assistance","category":"code","status":"permitted","division":"All","owner":"CTO Office","purpose":"Speed up development with AI-assisted coding inside the IDE.","scope":"Topicus repositories on GitHub Enterprise. Excludes pasting customer data or credentials into chat.","systems":["SYS-GHCOPILOT","SYS-AOAI"],"classification":{"level":"Confidential","confirmedBy":"Tom Visser","confirmedOn":"2025-09-14"},"dataTypes":["business"],"affected":["none"],"decisionImpact":"none","conditions":["Generated code follows the standard peer review and security scanning pipeline.","Public code filter enabled."],"keywords":["code","coding","programming","developer","ide","unit test","tests","refactor","debug","sql","script","copilot","pull request"],"lastReviewed":"2026-06-01"},{"id":"UC-003","title":"Transcribing and summarising internal meetings","category":"meetings","status":"conditional","division":"All","owner":"Head of Operations","purpose":"Meeting notes and action items without a note-taker.","scope":"Internal Topicus meetings. Meetings with patients, pupils or customers' end users are excluded.","systems":["SYS-TEAMSRECAP","SYS-WHISPER"],"classification":{"level":"Confidential","confirmedBy":"Privacy Office","confirmedOn":"2025-08-20"},"dataTypes":["business","personal"],"affected":["employees"],"decisionImpact":"none","conditions":["Announce transcription at the start of the meeting; participants may object.","Delete transcripts of HR-related conversations after minutes are approved."],"keywords":["meeting","transcribe","transcription","recap","minutes","notes","recording","audio","action items","speech to text"],"lastReviewed":"2026-04-15"},{"id":"UC-004","title":"Translating Public and Internal documents","category":"translation","status":"permitted","division":"All","owner":"Head of Corporate Communications","purpose":"Quick translations between Dutch, English and other languages.","scope":"Documents classified Public or Internal. Confidential documents are translated with Microsoft 365 Copilot instead.","systems":["SYS-DEEPL","SYS-M365COPILOT"],"classification":{"level":"Internal","confirmedBy":"Marieke Jansen","confirmedOn":"2025-04-08"},"dataTypes":["business"],"affected":["none"],"decisionImpact":"none","conditions":["Human check for legal or contractual texts."],"keywords":["translate","translation","dutch","english","german","language","vertalen"],"lastReviewed":"2026-04-08"},{"id":"UC-005","title":"Summarising discharge letters for care professionals","category":"decision-support","status":"pilot","division":"Healthcare","owner":"Product Director, Topicus Healthcare","purpose":"Give district nurses a structured summary of hospital discharge letters so care can start faster.","scope":"Pilot with two care organisations. Summaries are shown next to the original letter; the professional always reads the original before acting.","systems":["SYS-AOAI"],"classification":{"level":"Secret","confirmedBy":"Tom Visser","confirmedOn":"2026-03-01"},"dataTypes":["personal","special"],"affected":["patients"],"decisionImpact":"informs","conditions":["Pilot only; DPIA completed; NEN 7510 assessment completed.","Patient data stays in the Healthcare Azure landing zone.","Not to be extended to other letter types without a new review."],"keywords":["patient","discharge","letter","healthcare","nurse","care","clinical","medical","summary","hospital"],"lastReviewed":"2026-08-01"},{"id":"UC-006","title":"Suggested replies for customer support agents","category":"customer-facing","status":"conditional","division":"Finance","owner":"Head of Customer Support, Topicus Finance","purpose":"Draft answers to customer tickets that an agent edits and sends.","scope":"Support tickets of Topicus Finance products. The agent always reviews and sends; no automatic replies.","systems":["SYS-AOAI"],"classification":{"level":"Confidential","confirmedBy":"Tom Visser","confirmedOn":"2026-01-10"},"dataTypes":["personal","financial"],"affected":["customers"],"decisionImpact":"informs","conditions":["Agent review is mandatory; the send button is disabled until the draft is edited or explicitly approved.","Replies mention that the answer was drafted with AI assistance."],"keywords":["customer","support","ticket","reply","helpdesk","service desk","answer","response","chat"],"lastReviewed":"2026-07-10"},{"id":"UC-007","title":"Generating synthetic test data","category":"code","status":"permitted","division":"All","owner":"CTO Office","purpose":"Create realistic but fictitious test data sets for development and testing.","scope":"Synthetic data only. Never use real customer, patient or pupil data as input.","systems":["SYS-AOAI","SYS-GHCOPILOT","SYS-M365COPILOT"],"classification":{"level":"Internal","confirmedBy":"Tom Visser","confirmedOn":"2025-09-14"},"dataTypes":["none"],"affected":["none"],"decisionImpact":"none","conditions":["Verify that generated data does not accidentally reproduce real BSN or IBAN formats that pass validation in production."],"keywords":["test data","synthetic","dummy","fake data","fixtures","mock","sample data","testing"],"lastReviewed":"2026-06-01"},{"id":"UC-008","title":"Marketing copy and imagery for external publications","category":"images","status":"conditional","division":"Corporate","owner":"Head of Marketing","purpose":"Produce first drafts of marketing texts and illustrations for websites, brochures and social media.","scope":"Public information only. No imagery of real people.","systems":["SYS-FIREFLY","SYS-M365COPILOT"],"classification":{"level":"Public","confirmedBy":"Marieke Jansen","confirmedOn":"2026-02-10"},"dataTypes":["none"],"affected":["none"],"decisionImpact":"none","conditions":["Label AI-generated imagery.","Marketing reviews all copy before publication."],"keywords":["image","images","picture","illustration","marketing","social media","brochure","website","visual","design","generate image","logo"],"lastReviewed":"2026-02-10"},{"id":"UC-009","title":"Automated credit-risk scoring of loan applicants","category":"decision-support","status":"not-permitted","division":"Finance","owner":"Not assigned","purpose":"Requested: score mortgage applicants automatically using an LLM.","scope":"Not approved. High-risk under EU AI Act Annex III (access to essential services) and GDPR Art. 22.","systems":[],"classification":{"level":"Confidential","confirmedBy":"Marieke Jansen","confirmedOn":"2026-05-20"},"dataTypes":["personal","financial"],"affected":["customers"],"decisionImpact":"automated","conditions":["A conventional, explainable scoring model with human review may be proposed as a separate use case."],"keywords":["credit","scoring","loan","mortgage","risk score","applicant","creditworthiness","hypotheek"],"lastReviewed":"2026-05-20"},{"id":"UC-010","title":"Screening and ranking job applications","category":"decision-support","status":"not-permitted","division":"Corporate","owner":"Not assigned","purpose":"Requested: pre-select CVs for vacancies with AI.","scope":"Not approved. Employment decisions are high-risk under EU AI Act Annex III; bias risk considered unacceptable for the proposed approach.","systems":[],"classification":{"level":"Confidential","confirmedBy":"Marieke Jansen","confirmedOn":"2026-04-11"},"dataTypes":["personal"],"affected":["employees"],"decisionImpact":"informs","conditions":["Using Copilot to draft vacancy texts is permitted under UC-001."],"keywords":["cv","resume","recruitment","hiring","applicant","candidate","vacancy","hr","screening"],"lastReviewed":"2026-04-11"},{"id":"UC-011","title":"Flagging pupils at risk of falling behind (learning analytics)","category":"decision-support","status":"under-review","division":"Education","owner":"Product Manager, Topicus Education","purpose":"Help teachers spot pupils who may need extra support, based on results in the learning platform.","scope":"Under review. Teacher sees a signal, not a score; no automated action. DPIA in progress.","systems":["SYS-AOAI"],"classification":{"level":"Confidential","confirmedBy":"Privacy Office","confirmedOn":"2026-06-05"},"dataTypes":["personal","minors"],"affected":["students"],"decisionImpact":"informs","conditions":["Review by AI Governance Board scheduled for October 2026."],"keywords":["pupil","student","school","learning","education","teacher","grades","results","analytics","leerling"],"lastReviewed":"2026-06-05"},{"id":"UC-012","title":"Question answering over internal documentation (knowledge assistant)","category":"analysis","status":"permitted","division":"All","owner":"Head of IT Services","purpose":"Let employees ask questions about internal procedures, HR policies and product documentation.","scope":"Internal SharePoint and Confluence content up to Confidential, indexed with permission trimming.","systems":["SYS-AOAI","SYS-M365COPILOT"],"classification":{"level":"Confidential","confirmedBy":"Tom Visser","confirmedOn":"2025-12-01"},"dataTypes":["business"],"affected":["employees"],"decisionImpact":"none","conditions":["Answers always cite the source document.","Index respects source permissions."],"keywords":["question","answer","knowledge","documentation","search","faq","procedure","handbook","wiki","confluence","sharepoint","rag","chatbot"],"lastReviewed":"2026-06-01"},{"id":"UC-013","title":"Classifying and routing incoming citizen correspondence","category":"automation","status":"pilot","division":"Government","owner":"Product Owner, Topicus Government","purpose":"Sort incoming letters and e-mails to municipalities by topic and route them to the right department.","scope":"Pilot with one municipality. Routing suggestions are confirmed by a clerk; no decisions on the content of the request.","systems":["SYS-AOAI","SYS-AIBUILDER"],"classification":{"level":"Confidential","confirmedBy":"Tom Visser","confirmedOn":"2026-04-22"},"dataTypes":["personal"],"affected":["citizens"],"decisionImpact":"none","conditions":["Clerk confirms every routing suggestion during the pilot.","Processing register of the municipality updated."],"keywords":["classify","classification","routing","mail","letters","correspondence","municipality","citizen","government","intake","sorting","gemeente"],"lastReviewed":"2026-07-22"},{"id":"UC-014","title":"Extracting data from invoices and forms","category":"automation","status":"permitted","division":"Corporate","owner":"Head of Finance & Control","purpose":"Read supplier invoices and internal forms into structured data for processing.","scope":"Topicus' own administrative documents. Not for customers' end-user documents.","systems":["SYS-AIBUILDER"],"classification":{"level":"Confidential","confirmedBy":"Tom Visser","confirmedOn":"2025-10-01"},"dataTypes":["business","personal"],"affected":["none"],"decisionImpact":"none","conditions":["Extracted amounts are checked against the purchase order before payment."],"keywords":["invoice","extract","extraction","ocr","form","pdf","document processing","data entry","factuur"],"lastReviewed":"2026-04-01"},{"id":"UC-015","title":"Using consumer chatbots with any work information","category":"content","status":"not-permitted","division":"All","owner":"CISO Office","purpose":"Explicitly not permitted: consumer plans of ChatGPT, Gemini, Claude and similar assistants for work information.","scope":"Applies to all Topicus work information, including Internal. Public information on a personal account is allowed.","systems":["SYS-CHATGPT-CONSUMER"],"classification":{"level":"Internal","confirmedBy":"Tom Visser","confirmedOn":"2025-11-04"},"dataTypes":["business","personal"],"affected":["employees"],"decisionImpact":"none","conditions":["Use Microsoft 365 Copilot for the same tasks."],"keywords":["chatgpt","gemini","claude","consumer","free","personal account","chatbot","assistant"],"lastReviewed":"2026-05-04"}]},"routing":{"flow":{"name":"AI Tool Request - Route to decision maker","engine":"Microsoft Power Automate (existing flow, unchanged in slice 1)","target":"Microsoft Lists: 'AI Tool Requests'","note":"The portal hands the completed intake to the existing Power Automate flow. The flow creates the Microsoft Lists record and notifies the decision maker(s). Approval or rejection is always a human decision."},"divisionCoordinators":{"Healthcare":{"name":"Lotte Hendriks","role":"AI Coordinator, Topicus Healthcare"},"Finance":{"name":"Bram Smit","role":"AI Coordinator, Topicus Finance"},"Education":{"name":"Fleur de Groot","role":"AI Coordinator, Topicus Education"},"Government":{"name":"Jeroen Mulder","role":"AI Coordinator, Topicus Government"},"Corporate":{"name":"Marieke Jansen","role":"AI Governance Lead"}},"escalations":[{"id":"ESC-RISK","label":"Potentially high-risk use case","when":{"riskLevel":["high"]},"to":{"name":"AI Governance Board","role":"Chaired by Marieke Jansen"},"reason":"High-risk use cases require a full assessment by the AI Governance Board before the division can approve."},{"id":"ESC-CISO","label":"Secret information or new tool with Confidential data","when":{"any":[{"field":"classification","in":["Secret"]},{"all":[{"field":"toolStatus","in":["new"]},{"field":"classification","in":["Confidential"]}]}]},"to":{"name":"Tom Visser","role":"Information Security Officer, CISO Office"},"reason":"Security review of the tool and data flow."},{"id":"ESC-PRIVACY","label":"Personal data involved","when":{"all":[{"field":"dataTypes","includesAny":["personal","special","minors"]}]},"to":{"name":"Privacy Office","role":"Data Protection Officer"},"reason":"Privacy assessment and, where applicable, DPIA supervision."}]},"requests":{"requests":[{"id":"REQ-2026-0041","submittedAt":"2026-05-28T09:14:00Z","requester":{"name":"Daan Bakker","upn":"daan.bakker@topicus.nl","department":"Topicus Finance"},"status":"Approved","decision":{"by":"Bram Smit","at":"2026-06-12T14:00:00Z","outcome":"Approved with conditions","note":"Approved for the support team only; agent review mandatory."},"type":"existing-use-case","useCaseId":"UC-006","useCaseTitle":"Suggested replies for customer support agents","tool":{"mode":"approved","systemId":"SYS-AOAI","name":"Azure OpenAI Service (Topicus tenant)"},"profile":{"division":"Finance","category":"customer-facing","classification":"Confidential","dataTypes":["personal","financial"],"affected":["customers"],"decisionImpact":"informs","externalOutput":"yes","toolStatus":"approved","hosting":"eu","trainsOnData":"no"},"base":{"owner":"Daan Bakker","purpose":"Draft answers to customer tickets that an agent edits and sends.","scope":"Support tickets of Topicus Finance mortgage products."},"answers":{"humanOversight":"The agent reads and edits every draft; the send button is disabled until the draft is touched.","outputReview":"Agent review per ticket; weekly quality sample by the team lead.","promptHygieneAck":true,"incidentAck":true,"contentLabelling":"Yes, always","legalBasis":"Performance of a contract","dataMinimisation":"Ticket text and product type only; no IBAN or BSN.","dataSubjectInfo":"Privacy statement of the support portal updated.","aiInteractionNotice":"Yes, in the output","logging":"Yes, with retention policy","aiLiteracyAck":true,"dataFlow":"Azure OpenAI West Europe; drafts stored in the ticketing system.","accessControl":"Support agents (Entra group FIN-Support)","retention":"Not retained"},"risk":{"level":"high","flags":["HR-01","HR-08"]},"governedBy":[{"policyId":"POL-AI","version":2},{"policyId":"GL-GENAI","version":2},{"policyId":"POL-ISP","version":5},{"policyId":"REG-GDPR","version":2},{"policyId":"REG-AIACT","version":1},{"riskRulesVersion":2}],"routing":{"primary":{"name":"Bram Smit","role":"AI Coordinator, Topicus Finance"},"escalations":["ESC-RISK","ESC-PRIVACY"],"listsItemId":208,"flowRunId":"08585137001234567890"}},{"id":"REQ-2026-0057","submittedAt":"2026-07-03T13:42:00Z","requester":{"name":"Sanne de Vries","upn":"sanne.devries@topicus.nl","department":"Topicus Healthcare"},"status":"In review","decision":null,"type":"new-tool","useCaseId":"UC-003","useCaseTitle":"Transcribing and summarising internal meetings","tool":{"mode":"new","name":"Fireflies.ai","vendor":"Fireflies.ai Corp.","hosting":"non-eu","trainsOnData":"unknown","website":"https://fireflies.ai"},"justification":"Teams Recap does not work for our hybrid meetings held on the customer's Zoom tenant.","profile":{"division":"Healthcare","category":"meetings","classification":"Confidential","dataTypes":["business","personal"],"affected":["employees"],"decisionImpact":"none","externalOutput":"no","toolStatus":"new","hosting":"non-eu","trainsOnData":"unknown"},"base":{"owner":"Sanne de Vries","purpose":"Transcribe project meetings with a care organisation that uses Zoom.","scope":"Project meetings only; no care conversations."},"answers":{"noConfidentialBeforeApproval":true,"outputReview":"Project lead checks the summary before it is shared.","promptHygieneAck":true,"incidentAck":true,"dataFlow":"Unknown; vendor hosts in the US.","accessControl":"Project team","encryption":"Claimed, not documented","retention":"Unknown","legalBasis":"Legitimate interest","dataMinimisation":"Only meeting audio; no patient data discussed in these meetings.","dpa":"No","certifications":["SOC 2 Type II"],"licenceType":"Individual paid licence","budgetHolder":"Healthcare Engineering"},"risk":{"level":"elevated","flags":["HR-06","HR-07"]},"governedBy":[{"policyId":"POL-AI","version":3},{"policyId":"GL-GENAI","version":2},{"policyId":"POL-ISP","version":5},{"policyId":"REG-GDPR","version":2},{"policyId":"STD-NEN7510","version":1},{"policyId":"GL-SUPPLIER","version":3},{"riskRulesVersion":2}],"routing":{"primary":{"name":"Lotte Hendriks","role":"AI Coordinator, Topicus Healthcare"},"escalations":["ESC-CISO","ESC-PRIVACY"],"listsItemId":224,"flowRunId":"08585136998877665544"}}]},"tool-knowledge":{"disclaimer":"Prototype: this lookup uses a small built-in knowledge base to pre-fill the form. In the real solution an assistant would look up vendor documentation and trust-center pages and cite its sources. Always verify before submitting.","tools":[{"name":"Fireflies.ai","aliases":["fireflies"],"vendor":"Fireflies.ai Corp.","website":"https://fireflies.ai","kind":"Meeting transcription","hosting":"non-eu","hostingNote":"US (AWS); EU data residency only on Enterprise plan","trainsOnData":"unknown","trainsNote":"Opt-out available on paid plans according to vendor documentation","certifications":["SOC 2 Type II"],"licenceOptions":["Free or consumer plan","Individual paid licence","Team or Enterprise contract"],"notes":"Joins meetings as a bot participant; retains recordings and transcripts by default."},{"name":"Notion AI","aliases":["notion"],"vendor":"Notion Labs, Inc.","website":"https://notion.so","kind":"Writing assistant inside Notion","hosting":"non-eu","hostingNote":"US; EU data residency available for Enterprise workspaces","trainsOnData":"no","trainsNote":"Vendor states customer data is not used for training","certifications":["ISO/IEC 27001","SOC 2 Type II"],"licenceOptions":["Team or Enterprise contract"],"notes":"Uses third-party model providers (OpenAI, Anthropic) as sub-processors."},{"name":"Perplexity","aliases":["perplexity ai","perplexity pro"],"vendor":"Perplexity AI, Inc.","website":"https://perplexity.ai","kind":"AI search assistant","hosting":"non-eu","hostingNote":"US","trainsOnData":"yes","trainsNote":"Consumer plans may use queries for training unless disabled; Enterprise plan excludes training","certifications":["SOC 2 Type II"],"licenceOptions":["Free or consumer plan","Individual paid licence","Team or Enterprise contract"],"notes":"Web search means prompts may be sent to third-party search providers."},{"name":"Cursor","aliases":["cursor ai","cursor ide"],"vendor":"Anysphere, Inc.","website":"https://cursor.com","kind":"AI code editor","hosting":"non-eu","hostingNote":"US; Privacy Mode prevents code storage","trainsOnData":"no","trainsNote":"No training with Privacy Mode enabled (default for Business plans)","certifications":["SOC 2 Type II"],"licenceOptions":["Individual paid licence","Team or Enterprise contract"],"notes":"Alternative to GitHub Copilot Business, which is already approved for UC-002."},{"name":"Gamma","aliases":["gamma app","gamma.app"],"vendor":"Gamma Tech, Inc.","website":"https://gamma.app","kind":"Presentation generation","hosting":"non-eu","hostingNote":"US","trainsOnData":"unknown","trainsNote":"Not clearly documented","certifications":["None known"],"licenceOptions":["Free or consumer plan","Individual paid licence","Team or Enterprise contract"],"notes":"Consider Microsoft 365 Copilot in PowerPoint, which is approved."},{"name":"ElevenLabs","aliases":["eleven labs"],"vendor":"ElevenLabs Inc.","website":"https://elevenlabs.io","kind":"Voice generation","hosting":"non-eu","hostingNote":"US; EU residency for Enterprise","trainsOnData":"no","trainsNote":"Enterprise plan excludes training","certifications":["SOC 2 Type II"],"licenceOptions":["Individual paid licence","Team or Enterprise contract"],"notes":"Voice cloning of real people requires explicit consent."},{"name":"Jasper","aliases":["jasper ai"],"vendor":"Jasper AI, Inc.","website":"https://jasper.ai","kind":"Marketing copy generation","hosting":"non-eu","hostingNote":"US","trainsOnData":"no","trainsNote":"Vendor states no training on customer inputs","certifications":["SOC 2 Type II"],"licenceOptions":["Individual paid licence","Team or Enterprise contract"],"notes":"Overlaps with approved UC-008 (Copilot + Firefly)."},{"name":"Mistral Le Chat","aliases":["mistral","le chat"],"vendor":"Mistral AI","website":"https://mistral.ai","kind":"General assistant","hosting":"eu","hostingNote":"EU (France)","trainsOnData":"no","trainsNote":"Enterprise/Team plans exclude training; free plan may train","certifications":["ISO/IEC 27001","SOC 2 Type II"],"licenceOptions":["Free or consumer plan","Team or Enterprise contract"],"notes":"EU-hosted alternative; API also available in Azure AI Foundry."},{"name":"Zapier","aliases":["zapier ai","zapier agents"],"vendor":"Zapier, Inc.","website":"https://zapier.com","kind":"Automation with AI steps","hosting":"non-eu","hostingNote":"US","trainsOnData":"no","trainsNote":"Vendor states no training on customer data","certifications":["SOC 2 Type II"],"licenceOptions":["Free or consumer plan","Team or Enterprise contract"],"notes":"Power Automate is the approved automation platform; Zapier would duplicate it."},{"name":"Claude","aliases":["claude ai","anthropic claude","claude team","claude enterprise"],"vendor":"Anthropic PBC","website":"https://claude.ai","kind":"General assistant","hosting":"non-eu","hostingNote":"US; EU data residency options for Enterprise","trainsOnData":"no","trainsNote":"Team and Enterprise plans exclude training","certifications":["ISO/IEC 27001","SOC 2 Type II","ISO/IEC 42001 (AI management)"],"licenceOptions":["Free or consumer plan","Individual paid licence","Team or Enterprise contract"],"notes":"Claude models are also available inside GitHub Copilot (approved for UC-002)."},{"name":"Google Gemini","aliases":["gemini","gemini for workspace"],"vendor":"Google LLC","website":"https://gemini.google.com","kind":"General assistant","hosting":"non-eu","hostingNote":"US/EU; Workspace plans offer EU processing","trainsOnData":"yes","trainsNote":"Consumer app may use conversations for training; Workspace excludes training","certifications":["ISO/IEC 27001","SOC 2 Type II","ISO/IEC 42001 (AI management)"],"licenceOptions":["Free or consumer plan","Team or Enterprise contract"],"notes":"Topicus is a Microsoft 365 tenant; Copilot covers the same tasks."},{"name":"Otter.ai","aliases":["otter"],"vendor":"Otter.ai Inc.","website":"https://otter.ai","kind":"Meeting transcription","hosting":"non-eu","hostingNote":"US","trainsOnData":"yes","trainsNote":"Uses data to improve services per privacy policy","certifications":["SOC 2 Type II"],"licenceOptions":["Free or consumer plan","Individual paid licence","Team or Enterprise contract"],"notes":"Already reviewed and not permitted (see registry)."},{"name":"Canva Magic Studio","aliases":["canva","canva ai"],"vendor":"Canva Pty Ltd","website":"https://canva.com","kind":"Design and image generation","hosting":"non-eu","hostingNote":"US / Australia","trainsOnData":"unknown","trainsNote":"Opt-out setting per user","certifications":["ISO/IEC 27001","SOC 2 Type II"],"licenceOptions":["Free or consumer plan","Team or Enterprise contract"],"notes":"Adobe Firefly is the approved image generator (UC-008)."}]}};
+
+/*
+ * Browser-only API shim for the hosted (single-file) build.
+ *
+ * Replaces the Node server: the same FirmService runs in the page over a
+ * localStorage adapter seeded from window.FIRM_SEED. Every visitor therefore
+ * gets a private sandbox copy of the data in their own browser; tabs of the
+ * same browser share it (so a policy change in the registry tab shows up in
+ * the portal tab), and "Reset demo data" restores the seed.
+ */
+(function () {
+  'use strict';
+  const PREFIX = 'firm.data.';
+  const SEED = window.FIRM_SEED || {};
+
+  function readLS(key) { try { return localStorage.getItem(key); } catch (e) { return null; } }
+  function writeLS(key, val) { try { localStorage.setItem(key, val); } catch (e) { /* private mode: keep in memory */ } }
+  const mem = {};
+
+  const store = {
+    read(name) {
+      if (mem[name]) return JSON.parse(JSON.stringify(mem[name]));
+      const raw = readLS(PREFIX + name);
+      if (raw) { try { return JSON.parse(raw); } catch (e) { /* fall through to seed */ } }
+      const seed = JSON.parse(JSON.stringify(SEED[name] || {}));
+      return seed;
+    },
+    write(name, obj) {
+      const s = JSON.stringify(obj);
+      mem[name] = JSON.parse(s);
+      writeLS(PREFIX + name, s);
+      notify(name);
+    },
+    reset() {
+      Object.keys(SEED).forEach((name) => { delete mem[name]; try { localStorage.removeItem(PREFIX + name); } catch (e) { /* ignore */ } });
+      notify('*');
+    }
+  };
+  const service = window.FirmService.create(store);
+
+  // Change notifications: same tab (listeners) and other tabs (storage event).
+  const listeners = [];
+  function notify(name) { listeners.forEach((fn) => { try { fn(name); } catch (e) { /* ignore */ } }); }
+  window.addEventListener('storage', (e) => { if (e.key && e.key.indexOf(PREFIX) === 0) { const name = e.key.slice(PREFIX.length); delete mem[name]; notify(name); } });
+
+  window.FirmLocalApi = {
+    call(method, path, body, oid) {
+      const user = oid ? service.userByOid(oid) : null;
+      return new Promise((resolve, reject) => {
+        try { resolve(service.dispatch(method, path, body, user)); }
+        catch (e) { reject(new Error(e.message || 'Request failed')); }
+      });
+    },
+    exportMeta(kind) { return service.EXPORTS[kind]; },
+    onChange(fn) { listeners.push(fn); return () => { const i = listeners.indexOf(fn); if (i !== -1) listeners.splice(i, 1); }; }
+  };
+})();
+
+
+/*
+ * Mock Microsoft Entra ID sign-in + API helper + small UI utilities (shared by both apps).
+ *
+ * In production the apps would use MSAL and the server would validate the Entra ID
+ * token. Here the "account picker" yields a mock token ("mock.<oid>") whose role
+ * claims are checked on every write (by the Node server, or by the in-page service
+ * in the hosted build).
+ */
+(function () {
+  'use strict';
+
+  let KEY = 'firm.session';
+
+  function esc(s) {
+    return String(s === undefined || s === null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  }
+  function initials(name) { return name.split(/\s+/).filter(Boolean).slice(0, 2).map((p) => p[0].toUpperCase()).join(''); }
+  function relTime(iso) {
+    if (!iso) return '';
+    const d = (Date.now() - new Date(iso).getTime()) / 36e5;
+    if (d < 1) return 'Signed in recently';
+    if (d < 24) return 'Signed in ' + Math.round(d) + ' h ago';
+    return 'Signed in ' + Math.round(d / 24) + ' d ago';
+  }
+  function ss(get, key, val) { try { return get ? sessionStorage.getItem(key) : (val === null ? sessionStorage.removeItem(key) : sessionStorage.setItem(key, val)); } catch (e) { return null; } }
+
+  const Auth = {
+    /** Give each app its own session slot so one tab can switch apps with different personas. */
+    configure(opts) { KEY = 'firm.session' + (opts && opts.app ? '.' + opts.app : ''); },
+    session() { try { return JSON.parse(ss(true, KEY) || 'null'); } catch (e) { return null; } },
+    token() { const s = this.session(); return s ? 'mock.' + s.oid : null; },
+    headers() { const t = this.token(); return t ? { Authorization: 'Bearer ' + t } : {}; },
+    hasRole(role) { const s = this.session(); return !!(s && s.roles && s.roles.indexOf(role) !== -1); },
+    signOut() {
+      ss(false, KEY, null);
+      if (window.FirmBoot && window.FirmBoot.restart) window.FirmBoot.restart(); else location.reload();
+    },
+    /** Render the mock account picker into `mount`; resolves with the chosen account. */
+    async signIn(mount, opts) {
+      const data = await Api.get('/api/accounts');
+      if (opts.filter) data.accounts = data.accounts.filter(opts.filter);
+      return new Promise((resolve) => {
+        mount.innerHTML =
+          '<div class="signin-bg"><div class="signin">' +
+          '<div class="idp">' + esc(data.tenant.idp) + ' &middot; ' + esc(data.tenant.name) + '</div>' +
+          '<h1>Pick an account</h1>' +
+          '<div class="to">to continue to <b>' + esc(opts.appLabel) + '</b></div>' +
+          data.accounts.map((a) =>
+            '<button class="acct" data-oid="' + esc(a.oid) + '">' +
+            '<span class="avatar">' + esc(initials(a.name)) + '</span>' +
+            '<span><div class="n">' + esc(a.name) + '</div><div class="u">' + esc(a.upn) + '</div></span>' +
+            '<span class="s">' + esc(a.jobTitle) + '<br>' + esc(relTime(a.lastSignIn)) + '</span>' +
+            '</button>').join('') +
+          '<div class="other" title="Not available in the prototype"><span class="plus">+</span> Use another account</div>' +
+          '<div class="fine"><b>Prototype sign-in.</b> Simulates Microsoft Entra ID single sign-on: pick an account, its name, department and roles come with it.</div>' +
+          (opts.backLabel ? '<div class="fine"><button class="link-btn" id="signin-back">' + esc(opts.backLabel) + '</button></div>' : '') +
+          '</div></div>';
+        mount.querySelectorAll('.acct').forEach((btn) => {
+          btn.addEventListener('click', () => {
+            const a = data.accounts.find((x) => x.oid === btn.getAttribute('data-oid'));
+            const sess = { oid: a.oid, name: a.name, upn: a.upn, jobTitle: a.jobTitle, department: a.department, division: a.division, roles: a.roles, signedInAt: new Date().toISOString() };
+            ss(false, KEY, JSON.stringify(sess));
+            resolve(sess);
+          });
+        });
+        const back = mount.querySelector('#signin-back');
+        if (back && opts.onBack) back.addEventListener('click', opts.onBack);
+      });
+    },
+    userChipHtml(s, extra) {
+      return '<div class="user-chip"><span class="avatar">' + esc(initials(s.name)) + '</span>' +
+        '<span><div class="name">' + esc(s.name) + '</div><div class="role">' + esc(s.jobTitle) + ' &middot; ' + esc(s.department) + (extra ? ' &middot; ' + extra : '') + '</div></span>' +
+        '<button class="btn sm ghost signout" id="signout">Sign out</button></div>';
+    }
+  };
+
+  const Api = {
+    /** Hosted build: window.FirmLocalApi runs the service in-page. Local build: HTTP to the Node server. */
+    async call(method, path, body) {
+      if (window.FirmLocalApi) {
+        const s = Auth.session();
+        return window.FirmLocalApi.call(method, path, body, s ? s.oid : null);
+      }
+      const res = await fetch(path, { method: method, headers: Object.assign({ 'Content-Type': 'application/json' }, Auth.headers()), body: body === undefined ? undefined : JSON.stringify(body) });
+      const ct = res.headers.get('content-type') || '';
+      const data = ct.indexOf('json') !== -1 ? await res.json() : await res.text();
+      if (!res.ok) throw new Error((data && data.error) || ('Request failed (' + res.status + ')'));
+      return data;
+    },
+    get(p) { return this.call('GET', p); },
+    post(p, b) { return this.call('POST', p, b); },
+    put(p, b) { return this.call('PUT', p, b); },
+    /**
+     * Export download. Local build: navigate to the export route (browser download).
+     * Hosted build: hand the generated file to the viewer via the `downloads` capability,
+     * falling back to a copyable text modal when that is not available.
+     */
+    async download(kind) {
+      if (!window.FirmLocalApi) { window.location.href = '/api/export/' + kind; return; }
+      const meta = window.FirmLocalApi.exportMeta(kind);
+      const content = await this.get('/api/export/' + kind);
+      const text = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+      let dl = null;
+      try { if (window.claude && typeof window.claude.use === 'function') dl = await window.claude.use('downloads'); } catch (e) { dl = null; }
+      if (dl) {
+        try { await dl.save({ filename: meta.filename, data: text }); toast('Saved ' + meta.filename, 'ok'); return; }
+        catch (e) { if (e && e.code === 'declined') return; /* other errors: fall back to the modal */ }
+      }
+      const m = modal('<div class="modal-head"><h2>' + esc(meta.filename) + '</h2><button class="x" data-close>&times;</button></div>' +
+        '<div class="modal-body"><p class="muted">Downloads are not available in this viewer. Copy the export below.</p><textarea id="export-text" style="min-height:320px;font-family:var(--mono);font-size:12px">' + esc(text) + '</textarea></div>' +
+        '<div class="modal-foot"><button class="btn" data-close>Close</button><button class="btn primary" id="copy-export">Copy to clipboard</button></div>', { wide: true });
+      m.el.querySelector('#copy-export').addEventListener('click', async () => {
+        const ta = m.el.querySelector('#export-text'); ta.select();
+        try { await navigator.clipboard.writeText(text); toast('Copied', 'ok'); } catch (e) { document.execCommand('copy'); toast('Copied', 'ok'); }
+      });
+    }
+  };
+
+  function toast(msg, kind) {
+    let host = document.querySelector('.toast-host');
+    if (!host) { host = document.createElement('div'); host.className = 'toast-host'; document.body.appendChild(host); }
+    const el = document.createElement('div');
+    el.className = 'toast ' + (kind || '');
+    el.textContent = msg;
+    host.appendChild(el);
+    setTimeout(() => { el.remove(); }, 3800);
+  }
+
+  function modal(html, opts) {
+    const back = document.createElement('div');
+    back.className = 'modal-backdrop';
+    back.innerHTML = '<div class="modal ' + ((opts && opts.wide) ? 'wide' : '') + '">' + html + '</div>';
+    document.body.appendChild(back);
+    const close = () => back.remove();
+    back.addEventListener('click', (e) => { if (e.target === back && !(opts && opts.sticky)) close(); });
+    back.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', close));
+    return { el: back, close: close };
+  }
+
+  /** Promise-based confirm (browser dialogs are not reliable inside the artifact viewer). */
+  function confirmDialog(message, okLabel) {
+    return new Promise((resolve) => {
+      const m = modal('<div class="modal-head"><h2>Please confirm</h2><button class="x" data-close>&times;</button></div><div class="modal-body"><p>' + esc(message) + '</p></div>' +
+        '<div class="modal-foot"><button class="btn" data-close>Cancel</button><button class="btn primary" id="confirm-ok">' + esc(okLabel || 'Confirm') + '</button></div>', { sticky: true });
+      m.el.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => resolve(false)));
+      m.el.querySelector('#confirm-ok').addEventListener('click', () => { m.close(); resolve(true); });
+    });
+  }
+
+  function fmtDate(iso, withTime) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const opts = { day: 'numeric', month: 'short', year: 'numeric' };
+    if (withTime) { opts.hour = '2-digit'; opts.minute = '2-digit'; }
+    return d.toLocaleString('en-GB', opts);
+  }
+
+  window.FirmAuth = Auth;
+  window.FirmApi = Api;
+  window.FirmUI = { esc: esc, toast: toast, modal: modal, confirm: confirmDialog, fmtDate: fmtDate, initials: initials };
+})();
+
+
+/* Topicus AI Tooling Portal: find an approved tool first, request a new one only if nothing fits. */
+window.FirmPortal = { start: function (app, opts) {
+  'use strict';
+  opts = opts || {};
+  const E = window.FirmEngine, Auth = window.FirmAuth, Api = window.FirmApi, UI = window.FirmUI;
+  const esc = UI.esc, toast = UI.toast, fmtDate = UI.fmtDate;
+  const HP = opts.prefix ? '#' + opts.prefix : '#';
+  Auth.configure({ app: 'portal' });
+
+  const state = { user: null, doc: null, catalog: null, routing: null, query: '', intake: null, submitted: null, stopped: false };
+
+  const UC_STATUS = {
+    permitted: { label: 'Permitted', badge: 'green', help: 'Approved for everyone within the scope and conditions below.' },
+    conditional: { label: 'Permitted with conditions', badge: 'amber', help: 'Approved under the conditions below.' },
+    pilot: { label: 'Pilot', badge: 'blue', help: 'Approved for a named pilot group only.' },
+    'under-review': { label: 'Under review', badge: 'purple', help: 'A decision is pending.' },
+    'not-permitted': { label: 'Not permitted', badge: 'red', help: 'Reviewed and not approved.' }
+  };
+  const SYS_STATUS = {
+    approved: { label: 'Approved', badge: 'green' }, restricted: { label: 'Restricted', badge: 'amber' },
+    'under-review': { label: 'Under review', badge: 'purple' }, 'not-permitted': { label: 'Not permitted', badge: 'red' }
+  };
+  const INTENTS = [
+    ['Summarise documents', 'summarise documents'], ['Write code', 'code'], ['Transcribe a meeting', 'meeting transcription'],
+    ['Translate', 'translate'], ['Reply to customers', 'customer support reply'], ['Use ChatGPT', 'chatgpt']
+  ];
+  // "Why we ask" for the base fields every request collects
+  const BASE_WHY = {
+    owner: ['AI Policy AI-01', 'Every AI use case needs a named person accountable for how it is used and when it is reviewed.'],
+    purpose: ['AI Policy AI-02', 'The purpose is what classification, applicable rules and later reviews are measured against.'],
+    scope: ['AI Policy AI-02', 'Say what is in and what is out. Scope keeps the approval honest.'],
+    division: ['Routing', 'Decides which AI coordinator reviews the request and which sector rules apply.'],
+    category: ['Policy engine', 'Determines which guidelines apply, e.g. the Generative AI guidelines for writing and code.'],
+    affected: ['EU AI Act Annex III', 'AI that affects people is judged more strictly than AI that only affects documents.'],
+    decisionImpact: ['AI Policy AI-04, GDPR Art. 22', 'Output that informs or makes decisions about people triggers human-oversight requirements and the high-risk screening.'],
+    externalOutput: ['AI Policy AI-06, EU AI Act Art. 50', 'People outside Topicus must be told when they receive AI-generated content.'],
+    dataTypes: ['GDPR, Information Security Policy', 'The kind of data decides which privacy and security rules apply.'],
+    classification: ['AI Policy AI-03', 'Only tools approved for this classification may be used. We suggest a level; you confirm it.']
+  };
+
+  // ---------------------------------------------------------------------------
+  async function boot() {
+    let sess = Auth.session();
+    if (!sess) sess = await Auth.signIn(app, { appLabel: 'Topicus AI Tooling Portal', filter: (a) => a.roles.indexOf('Policy.Owner') === -1 });
+    if (state.stopped) return;
+    state.user = sess;
+    await reload();
+    try { state.intake = JSON.parse(sessionStorage.getItem('firm.intake') || 'null'); } catch (e) { state.intake = null; }
+    window.addEventListener('hashchange', onHash);
+    if (window.FirmLocalApi) unsubscribeData = window.FirmLocalApi.onChange(onDataChanged);
+    render();
+  }
+  let unsubscribeData = null;
+  function onHash() { if (!state.stopped) render(); }
+  async function onDataChanged() {
+    if (state.stopped) return;
+    await reload();
+    if (route().name !== 'request') render(); else { const r = document.getElementById('rail'); if (r && state.intake && !state.submitted) r.innerHTML = railHtml(state.intake); }
+  }
+  function stop() { state.stopped = true; window.removeEventListener('hashchange', onHash); if (unsubscribeData) unsubscribeData(); }
+
+  async function reload() {
+    const [doc, cat, routing] = await Promise.all([Api.get('/api/policies'), Api.get('/api/catalog'), Api.get('/api/routing')]);
+    state.doc = doc; state.catalog = cat; state.routing = routing;
+  }
+  function route() {
+    let h = location.hash || '';
+    if (opts.prefix) h = h.indexOf(HP) === 0 ? h.slice(HP.length) : ''; else h = h.slice(1);
+    const parts = h.replace(/^\//, '').split('/').filter(Boolean);
+    return { name: parts[0] || 'home', id: parts[1] ? decodeURIComponent(parts[1]) : null };
+  }
+  function go(h) { location.hash = HP + h.slice(1); }
+  function fixLinks() { app.querySelectorAll('a[href^="#/"]').forEach((a) => a.setAttribute('href', HP + a.getAttribute('href').slice(1))); }
+  function sys(id) { return state.catalog.systems.find((s) => s.id === id); }
+  function uc(id) { return state.catalog.useCases.find((u) => u.id === id); }
+
+  function render() {
+    const r = route();
+    const nav = [['home', 'Find a tool'], ['library', 'Use cases'], ['registry', 'Tools'], ['request', 'New request']];
+    let body = '';
+    if (r.name === 'home') body = viewHome();
+    else if (r.name === 'library') body = viewLibrary();
+    else if (r.name === 'registry') body = viewRegistry(r.id);
+    else if (r.name === 'request') body = viewIntake();
+    else body = viewHome();
+    app.innerHTML =
+      '<header class="topbar"><div class="topbar-inner">' +
+      '<a class="brand" href="#/"><span class="mark">AI</span><span>AI Tooling Portal<span class="sub">Topicus</span></span></a>' +
+      '<nav class="nav">' + nav.map((n) => '<button data-nav="' + n[0] + '" class="' + (r.name === n[0] ? 'active' : '') + '">' + n[1] + '</button>').join('') + '</nav>' +
+      Auth.userChipHtml(state.user) + '</div></header>' +
+      '<main class="page">' + body + '</main>' +
+      '<footer class="footer"><span>Prototype</span><span>&middot;</span><span>Tool register from Microsoft Lists</span><span>&middot;</span><span>Requests are routed by the existing approval flow</span></footer>';
+    fixLinks();
+    app.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => go('#/' + b.getAttribute('data-nav'))));
+    const so = document.getElementById('signout'); if (so) so.addEventListener('click', () => Auth.signOut());
+    bindView(r);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Search
+  // ---------------------------------------------------------------------------
+  const STOP = new Set(['the', 'a', 'an', 'to', 'for', 'of', 'and', 'or', 'in', 'on', 'with', 'my', 'our', 'i', 'want', 'need', 'use', 'using', 'can', 'do', 'how', 'is', 'it', 'some', 'ai', 'tool']);
+  const SYN = { summarize: 'summarise', summarizing: 'summarise', summarising: 'summarise', summaries: 'summary', transcripts: 'transcribe', transcript: 'transcribe', transcribing: 'transcribe', translating: 'translate', translations: 'translate', writing: 'write', coding: 'code', pictures: 'picture', photos: 'image', emails: 'email', mails: 'mail', docs: 'document', documents: 'document', meetings: 'meeting', customers: 'customer', patients: 'patient', students: 'student', pupils: 'pupil', invoices: 'invoice', letters: 'letter', tests: 'test' };
+  function tokens(q) { return q.toLowerCase().split(/[^a-z0-9]+/).filter((t) => t && !STOP.has(t)).map((t) => SYN[t] || t); }
+  function stem(t) { return t.length > 6 ? t.slice(0, 6) : t.length > 4 ? t.slice(0, 5) : t; }
+  function scoreText(text, toks) {
+    const words = text.toLowerCase().split(/[^a-z0-9]+/);
+    let s = 0;
+    toks.forEach((t) => { const st = stem(t); if (words.some((w) => w === t)) s += 3; else if (words.some((w) => w.indexOf(st) === 0)) s += 2; });
+    return s;
+  }
+  function search(q) {
+    const toks = tokens(q);
+    if (!toks.length) return { useCases: [], systems: [] };
+    const ucs = state.catalog.useCases.map((u) => ({ u: u, score: scoreText(u.keywords.join(' '), toks) * 1.2 + scoreText(u.title, toks) * 1.5 + scoreText(u.purpose + ' ' + u.scope, toks) * 0.6 + scoreText(u.systems.map((id) => (sys(id) || {}).name || '').join(' '), toks) }))
+      .filter((x) => x.score >= 2).sort((a, b) => b.score - a.score);
+    const systems = state.catalog.systems.map((s) => ({ s: s, sc: scoreText(s.name + ' ' + s.vendor + ' ' + s.kind, toks) })).filter((x) => x.sc >= 2).sort((a, b) => b.sc - a.sc).map((x) => x.s);
+    return { useCases: ucs.slice(0, 6), systems: systems.slice(0, 3) };
+  }
+
+  // ---------------------------------------------------------------------------
+  // Home: search first
+  // ---------------------------------------------------------------------------
+  function viewHome() {
+    const q = state.query;
+    let results;
+    if (q.trim()) {
+      const r = search(q);
+      results = '<div id="results">';
+      if (r.systems.length) {
+        results += '<h2>Tools</h2><div class="stack" style="margin-bottom:22px">' + r.systems.map((s) => {
+          const st = SYS_STATUS[s.status];
+          const linked = state.catalog.useCases.filter((u) => u.systems.indexOf(s.id) !== -1 && u.status !== 'not-permitted');
+          return '<div class="card"><div class="card-body row wrap"><div style="flex:1;min-width:260px"><div class="row wrap"><b>' + esc(s.name) + '</b><span class="badge ' + st.badge + '">' + st.label + '</span><span class="badge outline">up to ' + esc(s.maxClassification) + '</span></div><div class="muted" style="margin-top:4px">' + esc(s.approvedPurpose) + '</div></div>' +
+            '<div>' + (linked.length ? linked.map((u) => '<button class="link-btn" data-uc="' + u.id + '" style="display:block;text-align:left;font-size:13px">' + esc(u.title) + '</button>').join('') : '') + '</div></div></div>';
+        }).join('') + '</div>';
+      }
+      results += '<div class="row spread wrap"><h2>' + (r.useCases.length ? 'Use cases' : 'No use case matches') + '</h2><span class="legend">' + Object.keys(UC_STATUS).map((k) => '<span class="badge ' + UC_STATUS[k].badge + '" style="font-weight:500">' + UC_STATUS[k].label + '</span>').join('') + '</span></div>';
+      if (r.useCases.length) results += '<div class="uc-grid">' + r.useCases.map((x) => ucCard(x.u)).join('') + '</div>';
+      results += '<div class="card" style="margin-top:20px"><div class="card-body row wrap spread"><b>' + (r.useCases.length ? 'Nothing here fits?' : 'Nothing matches &ldquo;' + esc(q) + '&rdquo;.') + '</b><button class="btn primary" id="req-new-uc">Request a new tool or use case</button></div></div></div>';
+    } else {
+      const popular = state.catalog.useCases.filter((u) => u.status === 'permitted' || u.status === 'conditional').slice(0, 6);
+      results = '<div class="row spread wrap"><h2>Permitted use cases</h2><button class="link-btn" data-nav="library">All use cases &rarr;</button></div><div class="uc-grid">' + popular.map((u) => ucCard(u)).join('') + '</div>';
+    }
+    return '<div class="hero"><h1>What do you want to do with AI?</h1><p>Search the approved use cases and tools first. Request only if nothing fits.</p>' +
+      '<form class="search-big" id="search-form"><input type="search" id="q" placeholder="e.g. summarise a discharge letter, transcribe a customer meeting" value="' + esc(q) + '" autocomplete="off"><button class="btn primary" type="submit">Search</button></form>' +
+      '<div class="chips">' + INTENTS.map((i) => '<button class="chip ' + (q === i[1] ? 'on' : '') + '" data-intent="' + esc(i[1]) + '">' + esc(i[0]) + '</button>').join('') + '</div></div>' + results;
+  }
+
+  function ucCard(u) {
+    const st = UC_STATUS[u.status];
+    return '<div class="card clickable uc-card" data-uc="' + u.id + '"><div class="status-strip ' + u.status + '"></div><div class="card-body">' +
+      '<div class="row wrap"><span class="badge ' + st.badge + '"><span class="dot"></span>' + st.label + '</span><span class="badge outline">' + esc(u.classification.level) + '</span>' + (u.division !== 'All' ? '<span class="badge outline">' + esc(u.division) + '</span>' : '') + '</div>' +
+      '<h3>' + esc(u.title) + '</h3><div class="desc">' + esc(u.purpose) + '</div>' +
+      '<div class="tools">' + (u.systems.length ? u.systems.map((id) => { const s = sys(id); return s ? '<span class="tag">' + esc(s.name) + '</span>' : ''; }).join('') : '<span class="tag">No approved tool</span>') + '</div></div></div>';
+  }
+
+  function openUseCase(id) {
+    const u = uc(id); if (!u) return;
+    const st = UC_STATUS[u.status];
+    const usable = u.status === 'permitted' || u.status === 'conditional' || u.status === 'pilot';
+    const m = UI.modal('<div class="modal-head"><div><div class="row wrap" style="margin-bottom:4px"><span class="badge ' + st.badge + '"><span class="dot"></span>' + st.label + '</span><span class="badge outline">' + esc(u.classification.level) + '</span></div><h2 style="margin:0">' + esc(u.title) + '</h2></div><button class="x" data-close>&times;</button></div>' +
+      '<div class="modal-body stack">' +
+      '<div class="callout ' + (usable ? 'ok' : u.status === 'not-permitted' ? 'danger' : 'info') + '">' + esc(st.help) + (usable ? ' No request needed.' : '') + '</div>' +
+      '<dl class="kv"><dt>Purpose</dt><dd>' + esc(u.purpose) + '</dd><dt>Scope</dt><dd>' + esc(u.scope) + '</dd><dt>Owner</dt><dd>' + esc(u.owner) + '</dd><dt>Classification</dt><dd>' + esc(u.classification.level) + ' <span class="muted">confirmed ' + esc(fmtDate(u.classification.confirmedOn)) + '</span></dd></dl>' +
+      '<div><h3>' + (u.systems.length ? 'Approved tools' : 'Tools') + '</h3>' + (u.systems.length ? u.systems.map((sid) => { const s = sys(sid); if (!s) return ''; const ss = SYS_STATUS[s.status]; return '<div class="panel" style="margin-bottom:8px"><div class="row wrap"><b>' + esc(s.name) + '</b><span class="badge ' + ss.badge + '">' + ss.label + '</span><span class="badge outline">up to ' + esc(s.maxClassification) + '</span><span class="muted">' + esc(s.hostedIn) + '</span></div></div>'; }).join('') : '<p class="muted">No tool is linked to this use case.</p>') + '</div>' +
+      (u.conditions.length ? '<div><h3>Conditions</h3><ul style="margin:0;padding-left:18px">' + u.conditions.map((c) => '<li>' + esc(c) + '</li>').join('') + '</ul></div>' : '') +
+      '</div><div class="modal-foot"><button class="btn" data-close>Close</button>' +
+      (u.status !== 'not-permitted' ? '<button class="btn primary" id="req-new-tool">' + (u.systems.length ? 'Request another tool for this use case' : 'Request a tool for this use case') + '</button>' : '<button class="btn primary" id="req-alt">Request a different approach</button>') +
+      '</div>');
+    const nt = m.el.querySelector('#req-new-tool'); if (nt) nt.addEventListener('click', () => { m.close(); startIntake({ useCaseMode: 'existing', useCaseId: u.id, toolMode: 'new' }); });
+    const alt = m.el.querySelector('#req-alt'); if (alt) alt.addEventListener('click', () => { m.close(); startIntake({ useCaseMode: 'new', newTitle: '', category: u.category }); });
+  }
+
+  // ---------------------------------------------------------------------------
+  // Use-case library
+  // ---------------------------------------------------------------------------
+  const libFilter = { status: 'all', category: 'all', division: 'all' };
+  function viewLibrary() {
+    const cats = E.FIELDS.category.options;
+    const list = state.catalog.useCases.filter((u) => (libFilter.status === 'all' || u.status === libFilter.status) && (libFilter.category === 'all' || u.category === libFilter.category) && (libFilter.division === 'all' || u.division === libFilter.division || u.division === 'All'));
+    const groups = {};
+    list.forEach((u) => { (groups[u.category] = groups[u.category] || []).push(u); });
+    return '<div class="page-header"><div><h1>Use cases</h1><p>What you may do with AI, by use case rather than by tool.</p></div></div>' +
+      '<div class="card" style="margin-bottom:16px"><div class="card-body row wrap"><label class="row"><span class="muted">Status</span><select id="f-status" style="width:auto">' + ['all'].concat(Object.keys(UC_STATUS)).map((k) => '<option value="' + k + '"' + (libFilter.status === k ? ' selected' : '') + '>' + (k === 'all' ? 'All' : UC_STATUS[k].label) + '</option>').join('') + '</select></label>' +
+      '<label class="row"><span class="muted">Type of use</span><select id="f-cat" style="width:auto"><option value="all">All</option>' + cats.map((c) => '<option value="' + c.value + '"' + (libFilter.category === c.value ? ' selected' : '') + '>' + esc(c.label) + '</option>').join('') + '</select></label>' +
+      '<label class="row"><span class="muted">Division</span><select id="f-div" style="width:auto"><option value="all">All</option>' + E.FIELDS.division.options.map((d) => '<option value="' + d.value + '"' + (libFilter.division === d.value ? ' selected' : '') + '>' + esc(d.short) + '</option>').join('') + '</select></label>' +
+      '<span class="muted right">' + list.length + ' of ' + state.catalog.useCases.length + '</span></div></div>' +
+      (Object.keys(groups).length ? cats.filter((c) => groups[c.value]).map((c) => '<h2 style="margin-top:18px">' + esc(c.label) + '</h2><div class="uc-grid">' + groups[c.value].map((u) => ucCard(u)).join('') + '</div>').join('') : '<div class="empty"><h3>No use cases match these filters</h3></div>');
+  }
+
+  // ---------------------------------------------------------------------------
+  // Tools and models
+  // ---------------------------------------------------------------------------
+  function viewRegistry(tab) {
+    tab = tab || 'systems';
+    const c = state.catalog;
+    let body;
+    if (tab === 'models') {
+      body = '<div class="card"><div class="table-wrap"><table><thead><tr><th>Model</th><th>Provider</th><th>Hosted in</th><th>Trains on our data</th><th>Used by</th></tr></thead><tbody>' + c.models.map((m) => '<tr><td><b>' + esc(m.name) + '</b><div class="muted">' + esc(m.modality) + '</div></td><td>' + esc(m.provider) + '</td><td>' + esc(m.hostedIn) + '</td><td>' + esc(m.trainingOnCustomerData) + '</td><td>' + c.systems.filter((s) => s.models.indexOf(m.id) !== -1).map((s) => '<span class="tag">' + esc(s.name) + '</span> ').join('') + '</td></tr>').join('') + '</tbody></table></div></div>';
+    } else {
+      body = '<div class="card"><div class="table-wrap"><table><thead><tr><th>Tool</th><th>Status</th><th>Up to</th><th>Hosting &middot; training</th><th>Use cases</th></tr></thead><tbody>' + c.systems.map((s) => { const ss = SYS_STATUS[s.status]; const linked = c.useCases.filter((u) => u.systems.indexOf(s.id) !== -1); return '<tr><td><b>' + esc(s.name) + '</b><div class="muted">' + esc(s.vendor) + ' &middot; ' + esc(s.kind) + '</div><div>' + s.models.map((id) => { const m = c.models.find((x) => x.id === id); return m ? '<span class="tag">' + esc(m.name) + '</span> ' : ''; }).join('') + '</div></td><td><span class="badge ' + ss.badge + '">' + ss.label + '</span></td><td>' + esc(s.maxClassification) + '</td><td>' + esc(s.hostedIn) + '<div class="muted">Trains on our data: ' + esc(s.trainingOnCustomerData) + '</div></td><td>' + linked.map((u) => '<button class="link-btn" data-uc="' + u.id + '" style="display:block;text-align:left;font-weight:500;font-size:12.5px">' + esc(u.title) + '</button>').join('') + '</td></tr>'; }).join('') + '</tbody></table></div></div>';
+    }
+    return '<div class="page-header"><div><h1>Tools and models</h1><p>Reviewed tools, the models behind them and the use cases they are approved for.</p></div></div>' +
+      '<div class="row" style="margin-bottom:14px"><button class="btn ' + (tab === 'systems' ? 'primary' : '') + '" data-nav="registry/systems">Tools (' + c.systems.length + ')</button><button class="btn ' + (tab === 'models' ? 'primary' : '') + '" data-nav="registry/models">Models (' + c.models.length + ')</button><button class="btn" data-nav="library">Use cases (' + c.useCases.length + ')</button></div>' + body;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Request wizard
+  // ---------------------------------------------------------------------------
+  const STEPS = ['Use case & tool', 'Details', 'Data', 'Requirements', 'Submit'];
+  const STEP_VIEWS = {};
+
+  function newIntake(seed) {
+    const u = seed && seed.useCaseId ? uc(seed.useCaseId) : null;
+    return Object.assign({
+      step: 0,
+      useCaseMode: u ? 'existing' : 'new',
+      useCaseId: u ? u.id : null,
+      newTitle: '',
+      toolMode: seed && seed.toolMode ? seed.toolMode : (u && u.systems.length ? 'approved' : 'new'),
+      systemId: null,
+      newTool: { name: '', vendor: '', website: '', hosting: 'unknown', trainsOnData: 'unknown' },
+      justification: '',
+      base: { owner: state.user.name, purpose: u ? u.purpose : '', scope: u ? u.scope : '' },
+      profile: {
+        division: state.user.division || 'Corporate',
+        category: u ? u.category : (seed && seed.category) || 'content',
+        affected: u ? u.affected.slice() : [],
+        decisionImpact: u ? u.decisionImpact : 'none',
+        externalOutput: 'no',
+        dataTypes: u ? u.dataTypes.slice() : [],
+        classification: u ? u.classification.level : null
+      },
+      answers: {},
+      errors: {}
+    }, seed || {});
+  }
+  function startIntake(seed) { state.intake = newIntake(seed); saveIntake(); go('#/request'); if (route().name === 'request') render(); }
+  function saveIntake() { try { sessionStorage.setItem('firm.intake', JSON.stringify(state.intake)); } catch (e) { /* ignore */ } }
+
+  function approvedToolsFor(it) {
+    if (it.useCaseMode === 'existing' && it.useCaseId) return (uc(it.useCaseId) || { systems: [] }).systems.map(sys).filter((s) => s && (s.status === 'approved' || s.status === 'restricted'));
+    const ids = new Set();
+    state.catalog.useCases.filter((u) => u.category === it.profile.category && (u.status === 'permitted' || u.status === 'conditional')).forEach((u) => u.systems.forEach((id) => ids.add(id)));
+    return Array.from(ids).map(sys).filter((s) => s && s.status === 'approved');
+  }
+  function fullProfile(it) {
+    const p = Object.assign({}, it.profile);
+    p.toolStatus = it.toolMode === 'new' ? 'new' : 'approved';
+    if (it.toolMode === 'new') { p.hosting = it.newTool.hosting; p.trainsOnData = it.newTool.trainsOnData; }
+    else {
+      const s = it.systemId ? sys(it.systemId) : null;
+      p.hosting = s ? (/EU|Netherlands|Europe/i.test(s.hostedIn) ? 'eu' : 'non-eu') : 'eu';
+      p.trainsOnData = s ? (/^No/i.test(s.trainingOnCustomerData) ? 'no' : /^Yes/i.test(s.trainingOnCustomerData) ? 'yes' : 'unknown') : 'unknown';
+    }
+    if (!p.classification) p.classification = E.suggestClassification(p.dataTypes);
+    return p;
+  }
+  function evaluateIntake(it) { return E.evaluate(fullProfile(it), state.doc); }
+
+  function viewIntake() {
+    if (state.submitted) return viewSubmitted();
+    if (!state.intake) state.intake = newIntake(null);
+    const it = state.intake;
+    const view = ['stepUseCase', 'stepDetails', 'stepData', 'stepRequirements', 'stepReview'][it.step];
+    return '<div class="page-header"><div><h1>Request a tool or use case</h1><p>The form adapts to your use case and only asks what applies.</p></div><button class="btn ghost" id="intake-restart">Start over</button></div>' +
+      '<div class="steps">' + STEPS.map((s, i) => '<div class="step ' + (i === it.step ? 'active' : i < it.step ? 'done' : '') + '"><span class="n">' + (i < it.step ? '&#10003;' : i + 1) + '</span>' + s + '</div>').join('') + '</div>' +
+      '<div class="intake"><div class="card"><div class="card-body" id="step-body">' + STEP_VIEWS[view](it) + '</div></div><aside class="rail" id="rail">' + railHtml(it) + '</aside></div>';
+  }
+
+  function whyHtml(ref, text) { return '<details class="why"><summary>Why we ask</summary><div class="why-body"><b>' + esc(ref) + '.</b> ' + esc(text) + '</div></details>'; }
+  function err(it, k) { return it.errors[k] ? '<div class="err">' + esc(it.errors[k]) + '</div>' : ''; }
+  function fieldCls(it, k) { return 'field' + (it.errors[k] ? ' invalid' : ''); }
+
+  // Step 1: use case and tool ---------------------------------------------------
+  STEP_VIEWS.stepUseCase = function (it) {
+    const existing = it.useCaseMode === 'existing' ? uc(it.useCaseId) : null;
+    const approved = approvedToolsFor(it);
+    const candidates = it.useCaseMode === 'existing' && existing ? existing.systems.map(sys).filter(Boolean) : approved;
+    let html = '<h2>What do you want to do?</h2>' +
+      '<div class="choice-list" style="margin-bottom:14px">' +
+      '<label class="choice ' + (it.useCaseMode === 'existing' ? 'on' : '') + '"><input type="radio" name="ucm" value="existing" ' + (it.useCaseMode === 'existing' ? 'checked' : '') + '><span><div class="t">An existing use case</div><div class="h">You need a different tool for a use case that is already in the library.</div></span></label>' +
+      '<label class="choice ' + (it.useCaseMode === 'new' ? 'on' : '') + '"><input type="radio" name="ucm" value="new" ' + (it.useCaseMode === 'new' ? 'checked' : '') + '><span><div class="t">A new use case</div><div class="h">Nothing in the library covers your need.</div></span></label></div>';
+    if (it.useCaseMode === 'existing') {
+      html += '<label class="' + fieldCls(it, 'useCaseId') + '"><span class="lbl">Use case <span class="req">*</span></span><select data-k="useCaseId"><option value="">Select a use case</option>' + state.catalog.useCases.filter((u) => u.status !== 'not-permitted').map((u) => '<option value="' + u.id + '"' + (it.useCaseId === u.id ? ' selected' : '') + '>' + esc(u.title) + '</option>').join('') + '</select>' + err(it, 'useCaseId') + '</label>';
+      if (existing) html += '<div class="panel" style="margin-bottom:14px"><div class="row wrap"><span class="badge ' + UC_STATUS[existing.status].badge + '">' + UC_STATUS[existing.status].label + '</span><span class="badge outline">' + esc(existing.classification.level) + '</span><span class="muted">' + esc(existing.scope) + '</span></div></div>';
+    } else {
+      html += '<label class="' + fieldCls(it, 'newTitle') + '"><span class="lbl">Name the use case <span class="req">*</span></span><input type="text" data-k="newTitle" value="' + esc(it.newTitle) + '" placeholder="e.g. Drafting tender answers from past bids">' + err(it, 'newTitle') + '</label>' +
+        '<label class="field"><span class="lbl">Type of use</span><select data-p="category">' + E.FIELDS.category.options.map((o) => '<option value="' + o.value + '"' + (it.profile.category === o.value ? ' selected' : '') + '>' + esc(o.label) + '</option>').join('') + '</select>' + whyHtml(BASE_WHY.category[0], BASE_WHY.category[1]) + '</label>';
+      const similar = search(it.newTitle || '').useCases.filter((x) => x.u.status !== 'not-permitted').slice(0, 3);
+      if (similar.length) html += '<div class="callout info" style="margin-bottom:14px"><b>Similar approved use cases:</b><div style="margin-top:6px">' + similar.map((x) => '<button class="link-btn" data-uc="' + x.u.id + '" style="display:block;text-align:left">' + esc(x.u.title) + ' <span class="badge ' + UC_STATUS[x.u.status].badge + '" style="font-weight:500">' + UC_STATUS[x.u.status].label + '</span></button>').join('') + '</div></div>';
+    }
+    html += '<hr><h2>Which tool?</h2>';
+    if (candidates.length) html += '<p class="muted">Already approved for this kind of use. Pick one, or request a tool that is not in the register.</p>';
+    html += '<div class="tool-pick">' + candidates.map((s) => '<label class="tool-card ' + (it.toolMode === 'approved' && it.systemId === s.id ? 'on' : '') + '"><input type="radio" name="tool" value="' + s.id + '" ' + (it.toolMode === 'approved' && it.systemId === s.id ? 'checked' : '') + '><span><div class="t">' + esc(s.name) + '</div><div class="m">' + SYS_STATUS[s.status].label + ' &middot; up to ' + esc(s.maxClassification) + ' &middot; ' + esc(s.hostedIn) + '</div></span></label>').join('') +
+      '<label class="tool-card new ' + (it.toolMode === 'new' ? 'on' : '') + '"><input type="radio" name="tool" value="__new" ' + (it.toolMode === 'new' ? 'checked' : '') + '><span><div class="t">A tool that is not in the register</div><div class="m">A few questions about the vendor follow.</div></span></label></div>' + err(it, 'tool');
+    if (it.toolMode === 'new') {
+      const nt = it.newTool;
+      html += '<div class="panel" style="margin-top:14px"><div class="row spread wrap"><h3 style="margin:0">About the tool</h3><button class="btn sm" id="lookup-tool" ' + (nt.name.trim() ? '' : 'disabled') + '>Look up tool details</button></div>' +
+        '<div class="grid grid-2" style="margin-top:10px"><label class="' + fieldCls(it, 'toolName') + '"><span class="lbl">Tool name <span class="req">*</span></span><input type="text" data-nt="name" value="' + esc(nt.name) + '" placeholder="e.g. Fireflies.ai">' + err(it, 'toolName') + '</label><label class="field"><span class="lbl">Vendor</span><input type="text" data-nt="vendor" value="' + esc(nt.vendor) + '"></label>' +
+        '<label class="field"><span class="lbl">Website</span><input type="url" data-nt="website" value="' + esc(nt.website) + '" placeholder="https://"></label>' +
+        '<label class="field"><span class="lbl">Where is data hosted?</span><select data-nt="hosting">' + E.FIELDS.hosting.options.map((o) => '<option value="' + o.value + '"' + (nt.hosting === o.value ? ' selected' : '') + '>' + esc(o.label) + '</option>').join('') + '</select></label>' +
+        '<label class="field"><span class="lbl">Does the vendor train on customer data?</span><select data-nt="trainsOnData">' + E.FIELDS.trainsOnData.options.map((o) => '<option value="' + o.value + '"' + (nt.trainsOnData === o.value ? ' selected' : '') + '>' + esc(o.label) + '</option>').join('') + '</select></label></div>' +
+        '<div id="assist"></div>' + whyHtml('Supplier Assessment Guideline SUP-01', 'Vendor, hosting and training policy decide most of the security and privacy review. Unknown is an acceptable answer.') + '</div>';
+      if (approved.length) {
+        html += '<label class="' + fieldCls(it, 'justification') + '" style="margin-top:14px"><span class="lbl">Why do the approved tools not meet your need? <span class="req">*</span></span><div class="muted" style="margin-bottom:6px">' + approved.map((s) => '<span class="tag">' + esc(s.name) + '</span>').join(' ') + '</div><textarea data-k="justification" placeholder="A missing feature, an unsupported platform, a customer requirement.">' + esc(it.justification) + '</textarea>' + err(it, 'justification') + whyHtml('Supplier Assessment Guideline SUP-02', 'Every extra tool adds attack surface and licence cost. A concrete reason saves a review round.') + '</label>';
+      }
+    }
+    return html;
+  };
+
+  // Step 2: details --------------------------------------------------------------
+  STEP_VIEWS.stepDetails = function (it) {
+    const P = it.profile;
+    const sel = (k, o) => '<select data-p="' + k + '">' + o.map((x) => '<option value="' + x.value + '"' + (P[k] === x.value ? ' selected' : '') + '>' + esc(x.label) + '</option>').join('') + '</select>';
+    return '<h2>Use case details</h2>' +
+      '<label class="' + fieldCls(it, 'owner') + '"><span class="lbl">Accountable owner <span class="req">*</span></span><input type="text" data-b="owner" value="' + esc(it.base.owner) + '">' + err(it, 'owner') + whyHtml(BASE_WHY.owner[0], BASE_WHY.owner[1]) + '</label>' +
+      '<label class="' + fieldCls(it, 'purpose') + '"><span class="lbl">Purpose <span class="req">*</span></span><textarea data-b="purpose" placeholder="What problem does this solve, for whom?">' + esc(it.base.purpose) + '</textarea>' + err(it, 'purpose') + whyHtml(BASE_WHY.purpose[0], BASE_WHY.purpose[1]) + '</label>' +
+      '<label class="' + fieldCls(it, 'scope') + '"><span class="lbl">Scope <span class="req">*</span></span><textarea data-b="scope" placeholder="Which teams, systems and data are in scope? What is out?">' + esc(it.base.scope) + '</textarea>' + err(it, 'scope') + whyHtml(BASE_WHY.scope[0], BASE_WHY.scope[1]) + '</label>' +
+      '<div class="grid grid-2"><label class="field"><span class="lbl">Division</span>' + sel('division', E.FIELDS.division.options) + whyHtml(BASE_WHY.division[0], BASE_WHY.division[1]) + '</label>' +
+      (it.useCaseMode === 'existing' ? '<label class="field"><span class="lbl">Type of use</span>' + sel('category', E.FIELDS.category.options) + whyHtml(BASE_WHY.category[0], BASE_WHY.category[1]) + '</label>' : '<div></div>') + '</div>' +
+      '<div class="' + fieldCls(it, 'affected') + '"><span class="lbl">Who is affected by the output? <span class="req">*</span></span><div class="chips">' + E.FIELDS.affected.options.map((o) => '<button class="chip ' + (P.affected.indexOf(o.value) !== -1 ? 'on' : '') + '" data-many="affected:' + o.value + '">' + esc(o.label) + '</button>').join('') + '</div>' + err(it, 'affected') + whyHtml(BASE_WHY.affected[0], BASE_WHY.affected[1]) + '</div>' +
+      '<div class="grid grid-2" style="margin-top:14px"><label class="field"><span class="lbl">Role in decisions about people</span>' + sel('decisionImpact', E.FIELDS.decisionImpact.options) + whyHtml(BASE_WHY.decisionImpact[0], BASE_WHY.decisionImpact[1]) + '</label>' +
+      '<label class="field"><span class="lbl">Is output shared outside Topicus?</span>' + sel('externalOutput', E.FIELDS.externalOutput.options) + whyHtml(BASE_WHY.externalOutput[0], BASE_WHY.externalOutput[1]) + '</label></div>';
+  };
+
+  // Step 3: data and classification --------------------------------------------------
+  STEP_VIEWS.stepData = function (it) {
+    const P = it.profile;
+    const suggested = E.suggestClassification(P.dataTypes);
+    const s = it.toolMode === 'approved' && it.systemId ? sys(it.systemId) : null;
+    const warn = (s && P.classification && !E.classificationAtLeast(s.maxClassification, P.classification)) ? '<div class="callout warn" style="margin-top:12px"><b>' + esc(s.name) + ' is approved up to ' + esc(s.maxClassification) + '.</b> Your request will be flagged for security review.</div>' : '';
+    return '<h2>Data and classification</h2>' +
+      '<div class="' + fieldCls(it, 'dataTypes') + '"><span class="lbl">Which data is involved? <span class="req">*</span></span><div class="choice-list">' + E.FIELDS.dataTypes.options.map((o) => '<label class="choice ' + (P.dataTypes.indexOf(o.value) !== -1 ? 'on' : '') + '"><input type="checkbox" data-many="dataTypes:' + o.value + '" ' + (P.dataTypes.indexOf(o.value) !== -1 ? 'checked' : '') + '><span><div class="t">' + esc(o.label) + '</div></span></label>').join('') + '</div>' + err(it, 'dataTypes') + whyHtml(BASE_WHY.dataTypes[0], BASE_WHY.dataTypes[1]) + '</div>' +
+      '<div class="' + fieldCls(it, 'classification') + '" style="margin-top:18px"><span class="lbl">Confirm the classification <span class="req">*</span></span><p class="muted">Suggested from your data: <b>' + esc(suggested) + '</b>.</p><div class="class-pick">' + E.FIELDS.classification.options.map((o) => '<label class="choice ' + (P.classification === o.value ? 'on' : '') + '"><div class="row"><input type="radio" name="cls" value="' + o.value + '" ' + (P.classification === o.value ? 'checked' : '') + '><span class="t">' + esc(o.label) + '</span>' + (o.value === suggested ? '<span class="sugg">suggested</span>' : '') + '</div><div class="h">' + esc(o.hint) + '</div></label>').join('') + '</div>' + err(it, 'classification') + whyHtml(BASE_WHY.classification[0], BASE_WHY.classification[1]) + warn + '</div>';
+  };
+
+  // Step 4: requirements (generated from the applicable policies) -------------------------
+  STEP_VIEWS.stepRequirements = function (it) {
+    const res = evaluateIntake(it);
+    let html = '<h2>Requirements</h2><p class="muted">' + res.applicable.length + ' policies and guidelines apply to your use case. Only their questions are asked.</p>';
+    res.applicable.forEach((a) => {
+      const fields = res.intakeFields.filter((f) => f.policyId === a.id);
+      const covered = a.requirements.filter((r) => r.coveredBy);
+      html += '<div class="policy-group"><div class="pg-head"><b>' + esc(a.title) + '</b><span class="badge outline">' + esc(a.type) + '</span><details class="why right"><summary>Why this applies</summary><div class="why-body">' + esc(a.reason) + '</div></details></div><div class="pg-body">' +
+        covered.map((r) => '<div class="covered"><span class="ok">&#10003;</span><span>' + esc(r.text) + ' <span class="muted">(covered by ' + esc(r.coveredLabel).toLowerCase() + ')</span></span></div>').join('') +
+        fields.map((f) => fieldHtml(it, f)).join('') +
+        (!fields.length && !covered.length ? '<p class="muted">For your information; nothing to fill in.</p>' : '') +
+        '</div></div>';
+    });
+    return html;
+  };
+  function fieldHtml(it, f) {
+    const v = it.answers[f.key];
+    const req = f.required ? ' <span class="req">*</span>' : ' <span class="opt">optional</span>';
+    const why = '<details class="why"><summary>Why we ask</summary><div class="why-body"><b>' + esc(f.policyTitle) + ' ' + esc(f.requirementId) + ': ' + esc(f.requirementText) + '</b><br>' + esc(f.why) + '</div></details>';
+    const e = it.errors[f.key] ? '<div class="err">' + esc(it.errors[f.key]) + '</div>' : '';
+    const cls = 'field' + (it.errors[f.key] ? ' invalid' : '');
+    if (f.type === 'checkbox') return '<div class="' + cls + '"><label class="choice ' + (v ? 'on' : '') + '"><input type="checkbox" data-a="' + f.key + '" data-bool="1" ' + (v ? 'checked' : '') + '><span class="t">' + esc(f.label) + req + '</span></label>' + e + why + '</div>';
+    if (f.type === 'select') return '<label class="' + cls + '"><span class="lbl">' + esc(f.label) + req + '</span><select data-a="' + f.key + '"><option value="">Select&hellip;</option>' + f.options.map((o) => '<option' + (v === o ? ' selected' : '') + '>' + esc(o) + '</option>').join('') + '</select>' + e + why + '</label>';
+    if (f.type === 'multiselect') return '<div class="' + cls + '"><span class="lbl">' + esc(f.label) + req + '</span><div class="chips">' + f.options.map((o) => '<button class="chip ' + ((v || []).indexOf(o) !== -1 ? 'on' : '') + '" data-amany="' + f.key + ':' + esc(o) + '">' + esc(o) + '</button>').join('') + '</div>' + e + why + '</div>';
+    if (f.type === 'textarea') return '<label class="' + cls + '"><span class="lbl">' + esc(f.label) + req + '</span><textarea data-a="' + f.key + '" placeholder="' + esc(f.placeholder) + '">' + esc(v || '') + '</textarea>' + e + why + '</label>';
+    return '<label class="' + cls + '"><span class="lbl">' + esc(f.label) + req + '</span><input type="text" data-a="' + f.key + '" value="' + esc(v || '') + '" placeholder="' + esc(f.placeholder) + '">' + e + why + '</label>';
+  }
+
+  // Step 5: review and submit -------------------------------------------------------
+  STEP_VIEWS.stepReview = function (it) {
+    const res = evaluateIntake(it);
+    const P = fullProfile(it);
+    const routing = E.route(P, res.risk.level, state.routing);
+    const u = it.useCaseMode === 'existing' ? uc(it.useCaseId) : null;
+    const toolName = it.toolMode === 'new' ? it.newTool.name : (sys(it.systemId) || {}).name;
+    return '<h2>Review and submit</h2>' +
+      '<dl class="kv"><dt>Use case</dt><dd>' + esc(u ? u.title : it.newTitle) + (u ? '' : ' <span class="badge blue">new</span>') + '</dd><dt>Tool</dt><dd>' + esc(toolName) + (it.toolMode === 'new' ? ' <span class="badge amber">new tool</span>' : ' <span class="badge green">approved</span>') + '</dd>' + (it.justification ? '<dt>Why approved tools do not fit</dt><dd>' + esc(it.justification) + '</dd>' : '') +
+      '<dt>Owner</dt><dd>' + esc(it.base.owner) + '</dd><dt>Purpose</dt><dd>' + esc(it.base.purpose) + '</dd><dt>Scope</dt><dd>' + esc(it.base.scope) + '</dd>' +
+      '<dt>Profile</dt><dd>' + ['division', 'category', 'classification', 'dataTypes', 'affected', 'decisionImpact', 'externalOutput'].map((k) => '<span class="tag">' + esc(E.FIELDS[k].label) + ': ' + esc(Array.isArray(P[k]) ? P[k].map((v) => E.optionLabel(k, v, true)).join(', ') : E.optionLabel(k, P[k], true)) + '</span> ').join('') + '</dd></dl>' +
+      '<h3 style="margin-top:16px">Answers</h3><table><tbody>' + res.intakeFields.filter((f) => it.answers[f.key] !== undefined && it.answers[f.key] !== '').map((f) => '<tr><td style="width:55%">' + esc(f.label) + '<div class="muted">' + esc(f.policyTitle) + ' &middot; ' + esc(f.requirementId) + '</div></td><td>' + esc(it.answers[f.key] === true ? 'Confirmed' : Array.isArray(it.answers[f.key]) ? it.answers[f.key].join(', ') : it.answers[f.key]) + '</td></tr>').join('') + '</tbody></table>' +
+      '<h3 style="margin-top:16px">What happens next</h3><div class="flow">' +
+      '<div class="flow-step"><span class="ic">1</span><div><b>Checked against ' + res.applicable.length + ' policies and guidelines</b><div class="muted">' + res.applicable.map((a) => esc(a.shortTitle)).join(', ') + '.</div></div></div>' +
+      '<div class="flow-step"><span class="ic">2</span><div><b>Handed to the approval flow</b><div class="muted">The existing Power Automate flow creates the request record and notifies the reviewer.</div></div></div>' +
+      '<div class="flow-step"><span class="ic">3</span><div><b>Reviewed by ' + esc(routing.primary.name) + '</b><div class="muted">' + esc(routing.primary.role) + (routing.escalations.length ? ', together with ' + routing.escalations.map((e) => esc(e.to.name)).join(' and ') : '') + '. The decision is always made by a person.</div></div></div></div>' +
+      '<div id="submit-err" class="callout danger" style="margin-top:12px" hidden></div>';
+  };
+
+  function railHtml(it) {
+    const res = evaluateIntake(it);
+    const P = fullProfile(it);
+    const rl = E.RISK_LABELS[res.risk.level];
+    const routing = E.route(P, res.risk.level, state.routing);
+    return '<div class="card"><div class="card-head"><h3>What applies</h3><span class="muted right">' + res.intakeFields.length + ' questions</span></div><div class="card-body">' +
+      '<div class="risk-meter ' + res.risk.level + '"><div><b>' + esc(rl.title) + '</b><div style="font-size:12.5px">' + (res.risk.flags.length ? res.risk.flags.map((f) => esc(f.label)).join(' &middot; ') : 'No high-risk rules triggered') + '</div></div></div>' +
+      '<div style="margin-top:12px">' + res.applicable.map((a) => '<div class="rail-pol"><span>' + esc(a.shortTitle) + '</span><span class="v right">v' + a.version + '</span></div>').join('') + '</div></div></div>' +
+      '<div class="card"><div class="card-head"><h3>Who reviews</h3></div><div class="card-body"><div><b>' + esc(routing.primary.name) + '</b><div class="muted">' + esc(routing.primary.role) + '</div></div>' + routing.escalations.map((e) => '<div style="margin-top:8px"><b>' + esc(e.to.name) + '</b><div class="muted">' + esc(e.label) + '</div></div>').join('') + '</div></div>';
+  }
+
+  function validateStep(it) {
+    const e = {};
+    if (it.step === 0) {
+      if (it.useCaseMode === 'existing' && !it.useCaseId) e.useCaseId = 'Select a use case';
+      if (it.useCaseMode === 'new' && !it.newTitle.trim()) e.newTitle = 'Name the use case';
+      if (it.toolMode === 'approved' && !it.systemId) e.tool = 'Select a tool';
+      if (it.toolMode === 'new' && !it.newTool.name.trim()) e.toolName = 'Enter the tool name';
+      if (it.toolMode === 'new' && approvedToolsFor(it).length && !it.justification.trim()) e.justification = 'Explain why the approved tools do not meet your need';
+    }
+    if (it.step === 1) {
+      if (!it.base.owner.trim()) e.owner = 'Required';
+      if (!it.base.purpose.trim()) e.purpose = 'Required';
+      if (!it.base.scope.trim()) e.scope = 'Required';
+      if (!it.profile.affected.length) e.affected = 'Select at least one option';
+    }
+    if (it.step === 2) {
+      if (!it.profile.dataTypes.length) e.dataTypes = 'Select at least one option';
+      if (!it.profile.classification) e.classification = 'Confirm a classification';
+    }
+    if (it.step === 3) {
+      evaluateIntake(it).intakeFields.forEach((f) => { const v = it.answers[f.key]; if (f.required && (v === undefined || v === '' || v === false || (Array.isArray(v) && !v.length))) e[f.key] = 'Required'; });
+    }
+    it.errors = e;
+    return !Object.keys(e).length;
+  }
+
+  function bindIntake() {
+    const it = state.intake; if (!it) return;
+    const body = document.getElementById('step-body'); if (!body) return;
+    const rerender = () => { saveIntake(); render(); };
+    const rail = () => { saveIntake(); const r = document.getElementById('rail'); if (r) r.innerHTML = railHtml(it); };
+
+    body.insertAdjacentHTML('beforeend', '<div class="nav-btns">' + (it.step > 0 ? '<button class="btn" id="prev">&larr; Back</button>' : '<span></span>') + (it.step < STEPS.length - 1 ? '<button class="btn primary" id="next">Continue &rarr;</button>' : '<button class="btn primary lg" id="submit">Submit request</button>') + '</div>');
+    document.getElementById('intake-restart').addEventListener('click', async () => { if (await UI.confirm('Discard this request and start over?', 'Start over')) { state.intake = newIntake(null); saveIntake(); render(); } });
+    const prev = document.getElementById('prev'); if (prev) prev.addEventListener('click', () => { it.step--; it.errors = {}; rerender(); window.scrollTo(0, 0); });
+    const next = document.getElementById('next'); if (next) next.addEventListener('click', () => { if (validateStep(it)) { it.step++; rerender(); window.scrollTo(0, 0); } else { rerender(); toast('Please complete the highlighted fields', 'err'); } });
+    const sub = document.getElementById('submit'); if (sub) sub.addEventListener('click', submitIntake);
+
+    body.addEventListener('change', (e) => {
+      const t = e.target;
+      if (t.name === 'ucm') { it.useCaseMode = t.value; if (t.value === 'new') it.useCaseId = null; else it.toolMode = 'approved'; it.systemId = null; rerender(); return; }
+      if (t.getAttribute('data-k') === 'useCaseId') {
+        const u = uc(t.value); it.useCaseId = t.value || null;
+        if (u) { it.base.purpose = u.purpose; it.base.scope = u.scope; it.profile.category = u.category; it.profile.affected = u.affected.slice(); it.profile.decisionImpact = u.decisionImpact; it.profile.dataTypes = u.dataTypes.slice(); it.profile.classification = u.classification.level; it.toolMode = u.systems.length ? 'approved' : 'new'; it.systemId = null; }
+        rerender(); return;
+      }
+      if (t.name === 'tool') { if (t.value === '__new') { it.toolMode = 'new'; it.systemId = null; } else { it.toolMode = 'approved'; it.systemId = t.value; } rerender(); return; }
+      if (t.name === 'cls') { it.profile.classification = t.value; rerender(); return; }
+      if (t.getAttribute('data-p')) { it.profile[t.getAttribute('data-p')] = t.value; if (t.getAttribute('data-p') === 'category' && it.useCaseMode === 'new') rerender(); else rail(); return; }
+      if (t.getAttribute('data-nt')) { it.newTool[t.getAttribute('data-nt')] = t.value; rail(); return; }
+      if (t.getAttribute('data-b')) { it.base[t.getAttribute('data-b')] = t.value; return; }
+      if (t.getAttribute('data-k')) { it[t.getAttribute('data-k')] = t.value; return; }
+      if (t.getAttribute('data-many')) { const [k, v] = t.getAttribute('data-many').split(':'); toggleMany(it.profile, k, v); rerender(); return; }
+      if (t.getAttribute('data-a')) { it.answers[t.getAttribute('data-a')] = t.getAttribute('data-bool') ? t.checked : t.value; if (t.closest('.choice')) t.closest('.choice').classList.toggle('on', t.checked); saveIntake(); return; }
+    });
+    body.addEventListener('input', (e) => {
+      const t = e.target;
+      if (t.getAttribute('data-b')) { it.base[t.getAttribute('data-b')] = t.value; saveIntake(); }
+      if (t.getAttribute('data-k')) { it[t.getAttribute('data-k')] = t.value; saveIntake(); if (t.getAttribute('data-k') === 'newTitle') debounceSimilar(); }
+      if (t.getAttribute('data-nt')) { it.newTool[t.getAttribute('data-nt')] = t.value; saveIntake(); const lb = document.getElementById('lookup-tool'); if (lb) lb.disabled = !it.newTool.name.trim(); }
+      if (t.getAttribute('data-a')) { it.answers[t.getAttribute('data-a')] = t.value; saveIntake(); }
+    });
+    body.addEventListener('click', (e) => {
+      const b = e.target.closest('button'); if (!b) return;
+      if (b.getAttribute('data-many')) { e.preventDefault(); const [k, v] = b.getAttribute('data-many').split(':'); toggleMany(it.profile, k, v); b.classList.toggle('on'); rail(); return; }
+      if (b.getAttribute('data-amany')) { e.preventDefault(); const a = b.getAttribute('data-amany'); const k = a.slice(0, a.indexOf(':')), v = a.slice(a.indexOf(':') + 1); it.answers[k] = it.answers[k] || []; toggleMany(it.answers, k, v); b.classList.toggle('on'); saveIntake(); return; }
+      if (b.id === 'lookup-tool') { e.preventDefault(); lookupTool(); return; }
+      if (b.getAttribute('data-uc')) { e.preventDefault(); openUseCase(b.getAttribute('data-uc')); }
+    });
+    let simTimer = null;
+    function debounceSimilar() { clearTimeout(simTimer); simTimer = setTimeout(() => { const active = document.activeElement; const pos = active && active.selectionStart; rerender(); const inp = document.querySelector('[data-k="newTitle"]'); if (inp) { inp.focus(); try { inp.setSelectionRange(pos, pos); } catch (x) { /* ignore */ } } }, 700); }
+  }
+  function toggleMany(obj, k, v) { const arr = obj[k] || []; obj[k] = arr.indexOf(v) !== -1 ? arr.filter((x) => x !== v) : arr.concat([v]); }
+
+  async function lookupTool() {
+    const it = state.intake; const host = document.getElementById('assist'); if (!host) return;
+    host.innerHTML = '<div class="assist" style="margin-top:10px"><h4>Looking up &ldquo;' + esc(it.newTool.name) + '&rdquo;&hellip;</h4></div>';
+    try {
+      const r = await Api.get('/api/tool-lookup?name=' + encodeURIComponent(it.newTool.name.trim()));
+      if (!r.found) { host.innerHTML = '<div class="assist" style="margin-top:10px"><h4>No details found for &ldquo;' + esc(it.newTool.name) + '&rdquo;</h4><div class="muted">Fill in what you know. The reviewer completes the supplier assessment.</div></div>'; return; }
+      const t = r.tool;
+      const already = state.catalog.systems.find((s) => s.name.toLowerCase().indexOf(t.name.toLowerCase().split(' ')[0]) === 0);
+      host.innerHTML = '<div class="assist" style="margin-top:10px"><h4>' + esc(t.name) + ' by ' + esc(t.vendor) + '</h4><dl class="kv" style="grid-template-columns:130px 1fr"><dt>Kind</dt><dd>' + esc(t.kind) + '</dd><dt>Hosting</dt><dd>' + esc(t.hostingNote) + '</dd><dt>Training on data</dt><dd>' + esc(t.trainsNote) + '</dd><dt>Certifications</dt><dd>' + t.certifications.map(esc).join(', ') + '</dd></dl>' +
+        (already ? '<div class="callout ' + (already.status === 'not-permitted' ? 'danger' : 'info') + '" style="margin-top:8px;padding:8px 12px"><b>Already reviewed:</b> ' + esc(already.name) + ' is ' + SYS_STATUS[already.status].label.toLowerCase() + '.</div>' : '') +
+        '<div class="row" style="margin-top:10px"><button class="btn sm primary" id="apply-lookup">Use these details</button><span class="muted">Please verify before submitting.</span></div></div>';
+      host.querySelector('#apply-lookup').addEventListener('click', () => {
+        it.newTool.vendor = t.vendor; it.newTool.website = t.website; it.newTool.hosting = t.hosting; it.newTool.trainsOnData = t.trainsOnData;
+        if (t.certifications && t.certifications.length) it.answers.certifications = t.certifications.slice();
+        saveIntake(); render(); toast('Tool details filled in', 'ok');
+      });
+    } catch (e) { host.innerHTML = '<div class="assist" style="margin-top:10px">' + esc(e.message) + '</div>'; }
+  }
+
+  async function submitIntake() {
+    const it = state.intake;
+    const btn = document.getElementById('submit'); btn.disabled = true;
+    const u = it.useCaseMode === 'existing' ? uc(it.useCaseId) : null;
+    const payload = {
+      type: it.toolMode === 'new' ? 'new-tool' : (u ? 'existing-use-case' : 'new-use-case'),
+      useCaseId: u ? u.id : null,
+      useCaseTitle: u ? u.title : it.newTitle,
+      useCaseHasApprovedTools: approvedToolsFor(it).length > 0,
+      tool: it.toolMode === 'new' ? Object.assign({ mode: 'new' }, it.newTool) : { mode: 'approved', systemId: it.systemId, name: (sys(it.systemId) || {}).name },
+      justification: it.justification,
+      profile: fullProfile(it),
+      base: Object.assign({ title: it.newTitle || null }, it.base),
+      answers: it.answers
+    };
+    try {
+      const r = await Api.post('/api/requests', payload);
+      state.submitted = r; state.intake = null; sessionStorage.removeItem('firm.intake');
+      await reload(); render(); window.scrollTo(0, 0);
+    } catch (e) {
+      btn.disabled = false;
+      const el = document.getElementById('submit-err'); el.hidden = false; el.textContent = e.message;
+    }
+  }
+
+  function viewSubmitted() {
+    const r = state.submitted.request, ev = state.submitted.evaluation, rt = state.submitted.routing;
+    const rl = E.RISK_LABELS[r.risk.level];
+    return '<div class="card"><div class="card-body success"><div class="big">&#10003;</div><h1>Request ' + esc(r.id) + ' submitted</h1><p class="muted">' + esc(r.useCaseTitle) + (r.tool ? ' &middot; ' + esc(r.tool.name) : '') + '</p>' +
+      '<div class="row" style="justify-content:center;margin:10px 0"><span class="badge ' + (r.risk.level === 'high' ? 'red' : r.risk.level === 'elevated' ? 'amber' : 'green') + '">' + esc(rl.title) + '</span></div>' +
+      '<div class="flow">' +
+      '<div class="flow-step"><span class="ic done">&#10003;</span><div><b>Checked against ' + ev.applicable.length + ' policies and guidelines</b><div class="muted">' + (ev.risk.flags.length ? 'Flags: ' + ev.risk.flags.map((f) => esc(f.label)).join('; ') + '.' : 'No high-risk rules triggered.') + '</div></div></div>' +
+      '<div class="flow-step"><span class="ic done">&#10003;</span><div><b>Handed to the approval flow</b><div class="muted">Request record #' + esc(r.routing.listsItemId) + ' created; reviewer notified.</div></div></div>' +
+      '<div class="flow-step"><span class="ic wait">&#8987;</span><div><b>Awaiting review by ' + esc(rt.primary.name) + '</b><div class="muted">' + esc(rt.primary.role) + (rt.escalations.length ? ', together with ' + rt.escalations.map((e) => esc(e.to.name)).join(' and ') : '') + '.</div></div></div></div>' +
+      '<div class="row" style="justify-content:center;margin-top:22px"><button class="btn primary" id="to-home">Back to search</button></div></div></div>';
+  }
+
+  // ---------------------------------------------------------------------------
+  function bindView(r) {
+    app.querySelectorAll('[data-nav]').forEach((b) => b.addEventListener('click', () => go('#/' + b.getAttribute('data-nav'))));
+    app.querySelectorAll('[data-uc]').forEach((el) => { if (!el.closest('#step-body')) el.addEventListener('click', (e) => { e.stopPropagation(); openUseCase(el.getAttribute('data-uc')); }); });
+    app.querySelectorAll('#req-new-uc').forEach((b) => b.addEventListener('click', () => startIntake({ useCaseMode: 'new', newTitle: state.query.trim() && !search(state.query).useCases.length ? state.query.trim() : '' })));
+    const form = document.getElementById('search-form');
+    if (form) {
+      form.addEventListener('submit', (e) => { e.preventDefault(); state.query = document.getElementById('q').value; render(); const res = document.getElementById('results'); if (res) res.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+      app.querySelectorAll('[data-intent]').forEach((c) => c.addEventListener('click', () => { state.query = c.getAttribute('data-intent'); render(); }));
+      if (!state.query) document.getElementById('q').focus();
+    }
+    ['f-status', 'f-cat', 'f-div'].forEach((id) => { const el = document.getElementById(id); if (el) el.addEventListener('change', () => { libFilter[{ 'f-status': 'status', 'f-cat': 'category', 'f-div': 'division' }[id]] = el.value; render(); }); });
+    if (r.name === 'request') {
+      if (state.submitted) document.getElementById('to-home').addEventListener('click', () => { state.submitted = null; state.query = ''; go('#/'); });
+      else bindIntake();
+    } else if (state.submitted) state.submitted = null;
+  }
+
+  boot().catch((e) => { app.innerHTML = '<div class="empty"><h3>Could not load the portal</h3><p>' + esc(e.message) + '</p></div>'; });
+  return { stop: stop };
+} };
+
+
+window.FirmBoot = { restart: function () { window.__firmApp && window.__firmApp.stop(); window.__firmApp = window.FirmPortal.start(document.getElementById('app'), {}); } };
+window.__firmApp = window.FirmPortal.start(document.getElementById('app'), {});
+</script>
+</body>
+</html>
